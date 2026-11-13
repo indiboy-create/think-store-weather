@@ -77,8 +77,8 @@ foreach ([
     'src/Support/WeatherClient.php',
     'src/Support/WeatherCache.php',
     'theme/view/dashboard.html',
-    'theme/assets/site.css',
-    'theme/assets/app.js',
+    'theme/assets/css/site.css',
+    'theme/assets/js/app.js',
     'theme/assets/layui/layui.js',
     'theme/assets/layui/css/layui.css',
     'README.md',
@@ -163,6 +163,8 @@ $check(\Youvision\ThinkStoreWeather\Controller\AssetController::mime('a.unknown'
 $template = (string) file_get_contents($packageRoot . '/theme/view/dashboard.html');
 
 $check(str_contains($template, '{$asset}'), '页面模板应使用资源基址变量');
+$check(str_contains($template, '{$asset}/css/site.css'), '页面模板应引用分类后的样式资源');
+$check(str_contains($template, '{$asset}/js/app.js'), '页面模板应引用分类后的脚本资源');
 $check(str_contains($template, '{$api_base}'), '页面模板应使用接口基址变量');
 $check(str_contains($template, '{$music_url}'), '页面模板应使用音乐地址变量');
 $check(str_contains($template, '{$version}'), '页面模板应输出版本号');

@@ -11,8 +11,8 @@ class AssetTest extends TestCase
 {
     public function testResolveExistingAsset(): void
     {
-        $this->assertNotNull(AssetController::resolve('site.css'));
-        $this->assertNotNull(AssetController::resolve('app.js'));
+        $this->assertNotNull(AssetController::resolve('css/site.css'));
+        $this->assertNotNull(AssetController::resolve('js/app.js'));
         $this->assertNotNull(AssetController::resolve('layui/layui.js'));
         $this->assertNotNull(AssetController::resolve('layui/css/layui.css'));
         $this->assertNotNull(AssetController::resolve('layui/font/iconfont.woff2'));
@@ -34,8 +34,8 @@ class AssetTest extends TestCase
 
     public function testMimeMapping(): void
     {
-        $this->assertSame('text/css; charset=utf-8', AssetController::mime('site.css'));
-        $this->assertSame('application/javascript; charset=utf-8', AssetController::mime('app.js'));
+        $this->assertSame('text/css; charset=utf-8', AssetController::mime('css/site.css'));
+        $this->assertSame('application/javascript; charset=utf-8', AssetController::mime('js/app.js'));
         $this->assertSame('font/woff2', AssetController::mime('iconfont.woff2'));
         $this->assertSame('image/svg+xml', AssetController::mime('favicon.svg'));
         $this->assertSame('application/octet-stream', AssetController::mime('archive.bin'));

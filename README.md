@@ -65,6 +65,8 @@ think-store 商店会读取该字段作为发布包的「访问」地址。
 
 ```
 /store/think-store-weather/index
+/store/assets/css/site.css
+/store/assets/js/app.js
 /store/assets/layui/css/layui.css
 ```
 
@@ -190,7 +192,10 @@ think-store-weather/
 │  └─ data/                       # 省市站点树、站点白名单与本地音频
 ├─ theme/
 │  ├─ view/dashboard.html         # 天气页面模板
-│  └─ assets/                     # Layui、页面样式与脚本
+│  └─ assets/
+│     ├─ css/site.css             # 页面样式
+│     ├─ js/app.js                # 页面交互
+│     └─ layui/                   # 本地 Layui 2.13.9
 ├─ tests/
 ├─ phpstan.neon
 └─ phpunit.xml
