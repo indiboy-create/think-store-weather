@@ -3,7 +3,7 @@
 ThinkPHP 8 天气查询组件。提供两样东西：
 
 - **城市天气页面** —— 省市联动 + 实时天气 + 七天预报，Layui 2.13.9 本地化，默认河南郑州
-- **天气 JSON 接口** —— 代理中国天气网 `nmc.cn`，原样返回上游 JSON，默认缓存 8 小时，支持令牌强制刷新
+- **天气 JSON 接口** —— 代理远程天气接口，原样返回上游 JSON，默认缓存 8 小时，支持令牌强制刷新
 
 ## 安装
 
@@ -27,7 +27,7 @@ php think service:discover
 |---|---|---|
 | GET | `/weather` | 天气页面，默认展示河南省 · 郑州（`YVItN`） |
 | GET | `/weather/api/provinces` | 省市联动数据，树形数组，城市 `code` 即 `stationid` |
-| GET | `/weather/api/weather?stationid=YVItN` | 原样返回中国天气网 JSON，默认读缓存 |
+| GET | `/weather/api/weather?stationid=YVItN` | 原样返回上游天气 JSON，默认读缓存 |
 | GET | `/weather/api/refresh?stationid=YVItN&token=xxx` | 强制回源并覆盖缓存 |
 | GET | `/weather/assets/<path>` | 包内静态资源，含 Layui、样式与脚本 |
 
@@ -35,7 +35,7 @@ php think service:discover
 
 天气接口行为：
 
-- `stationid` 在 `src/data/stationid.php` 白名单内：原样转发 `https://www.nmc.cn/rest/weather?stationid=...` 的响应体，不做字段裁剪
+- `stationid` 在 `src/data/stationid.php` 白名单内：原样转发配置的上游接口响应体，不做字段裁剪
 - `stationid` 为空或不在白名单：自动回退到默认城市郑州（`YVItN`），响应头返回 `X-Weather-Fallback: 1`
 - 上游不可用：返回 HTTP 502 与 `{"code":-1,"msg":"...","data":null}`
 
@@ -43,7 +43,7 @@ php think service:discover
 
 ### 缓存与强制刷新
 
-- 天气响应默认缓存 **8 小时**（`cache_ttl`，单位秒），缓存键为 `weather:nmc:<stationid>`
+- 天气响应默认缓存 **8 小时**（`cache_ttl`，单位秒），缓存键为 `weather:station:<stationid>`
 - 命中缓存：`X-Weather-Cache: hit`，不会再请求上游
 - 未命中：`X-Weather-Cache: miss`，请求上游并写入缓存
 - 强制刷新：`X-Weather-Cache: refresh`，忽略缓存、回源并覆盖缓存
@@ -64,9 +64,9 @@ curl 'https://example.com/weather/api/refresh?stationid=YVItN&token=your-token'
 ```php
 // config/weather.php
 return [
-    // 中国天气网接口
-    'nmc' => [
-        'endpoint' => 'https://www.nmc.cn/rest/weather?stationid=%s',
+    // 远程天气接口
+    'api' => [
+        'endpoint' => 'https://example.com/rest/weather?stationid=%s',
         'timeout'  => 8,
         // 响应缓存时间（秒），默认 8 小时
         'cache_ttl' => 28800,
@@ -104,7 +104,7 @@ think-store-weather/
 │   ├── Controller/AssetController.php
 │   ├── data/province.php       # 省/市站点树
 │   ├── data/stationid.php      # 站点白名单
-│   └── Support/                # Province / Station / NmcWeather / WeatherCache / RefreshToken
+│   └── Support/                # Province / Station / WeatherClient / WeatherCache / RefreshToken
 ├── tests/
 ├── phpstan.neon
 └── .github/workflows/ci.yml

@@ -6,15 +6,15 @@ namespace Youvision\ThinkStoreWeather\Tests;
 
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use Youvision\ThinkStoreWeather\Support\NmcWeather;
 use Youvision\ThinkStoreWeather\Support\Station;
+use Youvision\ThinkStoreWeather\Support\WeatherClient;
 
-class NmcWeatherTest extends TestCase
+class WeatherClientTest extends TestCase
 {
     public function testQueryReturnsRawBodyForWhitelistedStation(): void
     {
         $captured = null;
-        $weather  = new NmcWeather('https://example.test/weather?stationid=%s', 3, function (string $url) use (&$captured): ?string {
+        $weather  = new WeatherClient('https://example.test/weather?stationid=%s', 3, function (string $url) use (&$captured): ?string {
             $captured = $url;
 
             return '{"code":0,"msg":"success","data":{"real":{}}}';
@@ -31,7 +31,7 @@ class NmcWeatherTest extends TestCase
     public function testUnknownStationFallsBackToDefaultStation(): void
     {
         $captured = null;
-        $weather  = new NmcWeather('https://example.test/weather?stationid=%s', 3, function (string $url) use (&$captured): ?string {
+        $weather  = new WeatherClient('https://example.test/weather?stationid=%s', 3, function (string $url) use (&$captured): ?string {
             $captured = $url;
 
             return '{"code":0,"msg":"success"}';
@@ -47,7 +47,7 @@ class NmcWeatherTest extends TestCase
 
     public function testQueryThrowsWhenUpstreamReturnsNothing(): void
     {
-        $weather = new NmcWeather('https://example.test/weather?stationid=%s', 3, static fn (): ?string => null);
+        $weather = new WeatherClient('https://example.test/weather?stationid=%s', 3, static fn (): ?string => null);
 
         $this->expectException(RuntimeException::class);
         $weather->query(Station::DEFAULT_CODE);

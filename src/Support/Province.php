@@ -8,7 +8,7 @@ namespace Youvision\ThinkStoreWeather\Support;
  * 省/市站点树数据访问。
  *
  * 数据来自包内 src/data/province.php：省份 id 1-34、pid=0，
- * 城市以省份 id 为 pid，code 即中国天气网所需的 stationid。
+ * 城市以省份 id 为 pid，code 即天气接口所需的 stationid。
  */
 final class Province
 {

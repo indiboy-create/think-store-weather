@@ -7,11 +7,11 @@ namespace Youvision\ThinkStoreWeather\Controller;
 use think\facade\Config;
 use think\Request;
 use think\response\View;
-use Youvision\ThinkStoreWeather\Support\NmcWeather;
-use Youvision\ThinkStoreWeather\Support\Province;
 use Youvision\ThinkStoreWeather\Support\RefreshToken;
 use Youvision\ThinkStoreWeather\Support\Station;
 use Youvision\ThinkStoreWeather\Support\WeatherCache;
+use Youvision\ThinkStoreWeather\Support\WeatherClient;
+use Youvision\ThinkStoreWeather\Support\Province;
 
 /**
  * 天气查询页面与 JSON 接口。
@@ -57,7 +57,7 @@ class WeatherController
         $stationid = Station::normalize($requested);
         $fallback  = $requested !== $stationid;
 
-        $expectedToken = (string) Config::get('weather.nmc.refresh_token', '');
+        $expectedToken = (string) Config::get('weather.api.refresh_token', '');
         $token         = (string) $request->param('token', '');
         $authorized    = RefreshToken::matches($token, $expectedToken);
 
@@ -70,8 +70,8 @@ class WeatherController
         }
 
         $cache = new WeatherCache(
-            'weather:nmc:',
-            (int) Config::get('weather.nmc.cache_ttl', 28800)
+            'weather:station:',
+            (int) Config::get('weather.api.cache_ttl', 28800)
         );
 
         // 令牌正确时跳过缓存，直接回源并覆盖缓存
@@ -83,11 +83,11 @@ class WeatherController
             }
         }
 
-        $endpoint = (string) Config::get('weather.nmc.endpoint', NmcWeather::DEFAULT_ENDPOINT);
-        $timeout  = (int) Config::get('weather.nmc.timeout', 8);
+        $endpoint = (string) Config::get('weather.api.endpoint', WeatherClient::DEFAULT_ENDPOINT);
+        $timeout  = (int) Config::get('weather.api.timeout', 8);
 
         try {
-            $result = (new NmcWeather($endpoint, $timeout))->query($requested);
+            $result = (new WeatherClient($endpoint, $timeout))->query($requested);
         } catch (\Throwable $e) {
             return json([
                 'code' => -1,

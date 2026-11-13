@@ -7,12 +7,12 @@ namespace Youvision\ThinkStoreWeather\Support;
 use RuntimeException;
 
 /**
- * 中国天气网（nmc.cn）实时天气查询。
+ * 远程天气接口客户端。
  *
  * 上游返回的 JSON 原样交给调用方，本类只负责白名单校验与回退，
  * 不做字段裁剪或重新编码。
  */
-final class NmcWeather
+final class WeatherClient
 {
     public const DEFAULT_ENDPOINT = 'https://www.nmc.cn/rest/weather?stationid=%s';
 

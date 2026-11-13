@@ -2,8 +2,8 @@
 
 // 复制到项目 config/weather.php 后即可覆盖下列默认值
 return [
-    // 中国天气网接口
-    'nmc' => [
+    // 远程天气接口
+    'api' => [
         'endpoint' => 'https://www.nmc.cn/rest/weather?stationid=%s',
         'timeout'  => 8,
         // 响应缓存时间（秒），默认 8 小时

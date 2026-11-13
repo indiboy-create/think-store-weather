@@ -9,13 +9,13 @@ use think\facade\Cache;
 /**
  * 天气响应缓存。
  *
- * 缓存上游原样返回的 JSON 字符串，命中时不再请求 nmc.cn。
+ * 缓存上游原样返回的 JSON 字符串，命中时不再发起远程请求。
  * 宿主缓存未配置或不可用时自动降级为不缓存，不影响接口返回。
  */
 final class WeatherCache
 {
     public function __construct(
-        private string $prefix = 'weather:nmc:',
+        private string $prefix = 'weather:station:',
         private int $ttl = 28800
     ) {
         $this->ttl = max(60, $this->ttl);

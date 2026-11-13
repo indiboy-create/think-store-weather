@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>天气查询 · think-store-weather</title>
-  <meta name="description" content="基于中国天气网数据的城市天气查询，ThinkPHP 8 + Layui 本地化实现。">
+  <meta name="description" content="城市天气查询，ThinkPHP 8 + Layui 本地化实现。">
   <link rel="stylesheet" href="{$asset}/layui/css/layui.css">
   <link rel="stylesheet" href="{$asset}/site.css">
 </head>
@@ -20,7 +20,7 @@
       <a href="#wx-forecast">七天预报</a>
       <a href="#wx-api">接口说明</a>
     </nav>
-    <span class="wx-source"><i class="layui-icon layui-icon-fire"></i> nmc.cn 数据源</span>
+    <span class="wx-source"><i class="layui-icon layui-icon-fire"></i> 实时数据</span>
   </div>
 </header>
 
@@ -30,7 +30,7 @@
       <span class="wx-badge"><i class="layui-icon layui-icon-engine"></i> ThinkPHP 8 · Layui 2.13.9 本地化</span>
       <h1 class="wx-hero-title">把每个城市的天气<br><em>放进一张可读的卡片</em></h1>
       <p class="wx-hero-sub">
-        省市联动选择来自包内行政区划数据，实时天气由中国天气网接口原样返回。
+        省市联动选择来自包内行政区划数据，实时天气由上游接口原样返回。
         城市代码不在白名单内时自动回退到默认城市，页面不会出现空白。
       </p>
 
@@ -151,7 +151,7 @@
         </article>
         <article class="wx-api-card">
           <div class="wx-api-head"><span class="wx-method">GET</span><code>{$api_base}/weather?stationid=YVItN</code></div>
-          <p>原样返回中国天气网 JSON；<code>stationid</code> 不在白名单时回退默认城市，并返回 <code>X-Weather-Fallback: 1</code>。</p>
+          <p>原样返回上游天气 JSON；<code>stationid</code> 不在白名单时回退默认城市，并返回 <code>X-Weather-Fallback: 1</code>。</p>
         </article>
       </div>
 
@@ -166,7 +166,7 @@
 <footer class="wx-footer">
   <div class="wx-container wx-footer-inner">
     <span>Weather · think-store-weather</span>
-    <span>数据来源 nmc.cn · Built with Layui 2.13.9</span>
+    <span>实时天气数据 · Built with Layui 2.13.9</span>
   </div>
 </footer>
 
