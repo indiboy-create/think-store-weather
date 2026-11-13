@@ -1,0 +1,58 @@
+{
+    "name": "youvision/lizi",
+    "description": "ThinkPHP 8 开发期粒子级工具箱：内置开发服务器、请求轨迹追踪与端口探测。",
+    "type": "library",
+    "keywords": [
+        "thinkphp",
+        "devtools",
+        "debug",
+        "server",
+        "trace"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Youvision",
+            "email": "dev@youvision.cn"
+        }
+    ],
+    "require": {
+        "php": ">=8.0",
+        "topthink/framework": "^8.0"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2.2",
+        "phpunit/phpunit": "^9.6 || ^10.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Youvision\\Lizi\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Youvision\\Lizi\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "think": {
+            "services": [
+                "Youvision\\Lizi\\Service"
+            ]
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "analyse": "phpstan analyse --no-progress",
+        "check": [
+            "@test",
+            "@analyse"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {}
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
