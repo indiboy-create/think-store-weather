@@ -7,11 +7,12 @@ namespace Youvision\ThinkStoreWeather\Controller;
 use think\facade\Config;
 use think\Request;
 use think\response\View;
+use Youvision\ThinkStoreWeather\Support\AudioRange;
+use Youvision\ThinkStoreWeather\Support\Province;
 use Youvision\ThinkStoreWeather\Support\RefreshToken;
 use Youvision\ThinkStoreWeather\Support\Station;
 use Youvision\ThinkStoreWeather\Support\WeatherCache;
 use Youvision\ThinkStoreWeather\Support\WeatherClient;
-use Youvision\ThinkStoreWeather\Support\Province;
 
 /**
  * 天气查询页面与 JSON 接口。
@@ -22,14 +23,18 @@ use Youvision\ThinkStoreWeather\Support\Province;
  * - GET /weather/api/weather         天气 JSON（默认读缓存）
  * - GET /weather/api/refresh         强制刷新天气 JSON（需 token）
  * - GET /weather/assets/<path>       包内静态资源（Layui、样式、脚本）
+ * - GET /weather/music               页面背景音乐（支持 Range）
  */
 class WeatherController
 {
+    private const AUDIO_FILE = '/data/zhengzhou.mp3';
+
     public function index(): View
     {
         return view(dirname(__DIR__, 2) . '/theme/view/dashboard.html', [
             'asset'            => $this->assetBase(),
             'api_base'         => '/weather/api',
+            'music_url'        => '/weather/music',
             'default_station'  => Station::DEFAULT_CODE,
             'default_city'     => Station::DEFAULT_CITY,
             'default_province' => Station::DEFAULT_PROVINCE,
@@ -49,6 +54,48 @@ class WeatherController
     public function refresh(Request $request): \think\Response
     {
         return $this->respond($request, true);
+    }
+
+    public function music(Request $request): \think\Response
+    {
+        $file = dirname(__DIR__) . self::AUDIO_FILE;
+
+        if (!is_file($file)) {
+            return response('', 404);
+        }
+
+        $size = (int) filesize($file);
+        $raw  = $request->header('range');
+        $range = AudioRange::parse(is_string($raw) ? $raw : null, $size);
+
+        if ($range === null) {
+            $body = (string) file_get_contents($file);
+
+            return response($body, 200, [
+                'Content-Type'   => 'audio/mpeg',
+                'Content-Length' => (string) $size,
+                'Accept-Ranges'  => 'bytes',
+                'Cache-Control'  => 'public, max-age=86400',
+            ]);
+        }
+
+        $handle = fopen($file, 'rb');
+
+        if ($handle === false) {
+            return response('', 500);
+        }
+
+        fseek($handle, $range['start']);
+        $body = (string) fread($handle, $range['end'] - $range['start'] + 1);
+        fclose($handle);
+
+        return response($body, 206, [
+            'Content-Type'   => 'audio/mpeg',
+            'Content-Length' => (string) strlen($body),
+            'Content-Range'  => sprintf('bytes %d-%d/%d', $range['start'], $range['end'], $size),
+            'Accept-Ranges'  => 'bytes',
+            'Cache-Control'  => 'public, max-age=86400',
+        ]);
     }
 
     private function respond(Request $request, bool $refreshEndpoint): \think\Response

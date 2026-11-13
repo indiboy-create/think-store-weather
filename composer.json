@@ -1,13 +1,13 @@
 {
     "name": "youvision/think-store-weather",
-    "description": "ThinkPHP 8 开发期工具箱：内置开发服务器、请求轨迹追踪与端口探测。",
+    "description": "ThinkPHP 8 天气查询组件：省市联动、上游天气 JSON 接口与 8 小时缓存。",
     "type": "library",
     "keywords": [
         "thinkphp",
-        "devtools",
-        "debug",
-        "server",
-        "trace"
+        "weather",
+        "layui",
+        "api",
+        "cache"
     ],
     "license": "MIT",
     "authors": [

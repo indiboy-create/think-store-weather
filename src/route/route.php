@@ -17,6 +17,7 @@ Route::get('weather$', [WeatherController::class, 'index'])->name('weather.index
 Route::get('weather/api/provinces$', [WeatherController::class, 'provinces'])->name('weather.provinces');
 Route::get('weather/api/weather$', [WeatherController::class, 'weather'])->name('weather.api');
 Route::get('weather/api/refresh$', [WeatherController::class, 'refresh'])->name('weather.refresh');
+Route::get('weather/music$', [WeatherController::class, 'music'])->name('weather.music');
 
 // 静态资源直接由路由输出，无需发布到 public
 Route::get('weather/assets/<path>', [AssetController::class, 'file'])

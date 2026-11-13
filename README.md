@@ -1,9 +1,10 @@
 # youvision/think-store-weather
 
-ThinkPHP 8 天气查询组件。提供两样东西：
+ThinkPHP 8 天气查询组件。提供三样东西：
 
-- **城市天气页面** —— 省市联动 + 实时天气 + 七天预报，Layui 2.13.9 本地化，默认河南郑州
+- **城市天气页面** —— 省市联动 + 实时天气 + 温度趋势 + 七天预报，响应式布局，Layui 2.13.9 本地化，默认河南郑州
 - **天气 JSON 接口** —— 代理远程天气接口，原样返回上游 JSON，默认缓存 8 小时，支持令牌强制刷新
+- **城市电台** —— 页面右下角悬浮播放器，播放包内 `zhengzhou.mp3`，支持进度拖动
 
 ## 安装
 
@@ -30,6 +31,7 @@ php think service:discover
 | GET | `/weather/api/weather?stationid=YVItN` | 原样返回上游天气 JSON，默认读缓存 |
 | GET | `/weather/api/refresh?stationid=YVItN&token=xxx` | 强制回源并覆盖缓存 |
 | GET | `/weather/assets/<path>` | 包内静态资源，含 Layui、样式与脚本 |
+| GET | `/weather/music` | 页面背景音乐，支持 HTTP Range 与进度拖动 |
 
 页面使用包内 `src/data/province.php` 的省/市树，城市节点中的 `code` 直接作为天气接口的 `stationid`。
 
@@ -95,7 +97,7 @@ think-store-weather/
 │   ├── view/dashboard.html     # 天气页面模板（不对外暴露）
 │   └── assets/                 # 由 /weather/assets/<path> 路由直接输出
 │       ├── layui/              # Layui 2.13.9 本地文件
-│       ├── app.js              # 城市联动与天气渲染
+│       ├── app.js              # 城市联动、趋势图与电台播放器
 │       └── site.css            # 页面样式
 ├── src/
 │   ├── Service.php             # 服务提供者（配置合并、路由）
@@ -104,10 +106,10 @@ think-store-weather/
 │   ├── Controller/AssetController.php
 │   ├── data/province.php       # 省/市站点树
 │   ├── data/stationid.php      # 站点白名单
-│   └── Support/                # Province / Station / WeatherClient / WeatherCache / RefreshToken
+│   ├── data/zhengzhou.mp3      # 页面背景音乐
+│   └── Support/                # Province / Station / WeatherClient / WeatherCache / RefreshToken / AudioRange
 ├── tests/
-├── phpstan.neon
-└── .github/workflows/ci.yml
+└── phpstan.neon
 ```
 
 ## 开发
@@ -118,8 +120,6 @@ composer test        # PHPUnit
 composer analyse     # PHPStan level 5
 composer check       # 两者一起跑
 ```
-
-CI 矩阵覆盖 PHP 8.0–8.4，并额外跑一次 `--prefer-lowest`，确保 `composer.json` 里的依赖区间没有写窄或写漏。
 
 > 本地若使用自签证书或企业代理导致 PHP curl 报 `self-signed certificate in certificate chain`，需要给 PHP 配置可信 CA（`curl.cainfo` / `openssl.cafile`），而不是关闭 SSL 校验。
 

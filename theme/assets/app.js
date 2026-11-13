@@ -23,7 +23,6 @@
       || value === ''
       || value === '-'
       || value === 9999
-      || value === 9999.0
       || value === '9999'
       || value === '9999.0';
   }
@@ -208,10 +207,12 @@
     var air = data.air || {};
     var station = real.station || {};
     var cityEl = document.querySelector('select[name="city"]');
-    var cityName = station.city || (cityEl && cityEl.options[cityEl.selectedIndex] ? cityEl.options[cityEl.selectedIndex].text : '') || cfg.defaultCity;
+    var cityName = station.city
+      || (cityEl && cityEl.selectedIndex >= 0 ? cityEl.options[cityEl.selectedIndex].text : '')
+      || cfg.defaultCity;
 
-    el('wx-city').textContent = (station.province ? station.province + ' · ' : '') + cityName;
-    el('wx-publish').textContent = real.publish_time ? '更新时间 ' + real.publish_time : '更新时间未知';
+    el('wx-city').textContent = cityName;
+    el('wx-publish').textContent = real.publish_time ? '更新于 ' + real.publish_time : '更新时间未知';
     el('wx-temp').textContent = fixed(weather.temperature, 1);
     el('wx-info').textContent = isMissing(weather.info) ? '天气现象暂无' : weather.info;
     el('wx-feel').textContent = '体感 ' + fixed(weather.feelst, 1) + '°C';
@@ -223,9 +224,12 @@
     el('wx-rain').textContent = fixed(weather.rain, 1, ' mm');
 
     var windTag = el('wx-wind');
-    windTag.textContent = isMissing(wind.speed) ? show(wind.power) : show(wind.power) + ' · ' + fixed(wind.speed, 1, ' m/s');
+    windTag.textContent = isMissing(wind.speed)
+      ? show(wind.power)
+      : show(wind.power) + ' · ' + fixed(wind.speed, 1, ' m/s');
 
     var aqiTag = el('wx-aqi');
+
     if (isMissing(air.aqi)) {
       aqiTag.textContent = 'AQI —';
       aqiTag.className = 'wx-tag is-ghost';
@@ -237,7 +241,88 @@
     el('wx-station').textContent = state.stationid;
     el('wx-json').textContent = JSON.stringify(body, null, 2);
 
+    renderTrend(data.tempchart);
     renderForecast(data);
+  }
+
+  function renderTrend(chart) {
+    var box = el('wx-trend-body');
+    var items = [];
+
+    (Array.isArray(chart) ? chart : []).forEach(function (row) {
+      var max = Number(row.max_temp);
+      var min = Number(row.min_temp);
+      var date = String(row.time || '');
+
+      if (date && isFinite(max) && isFinite(min) && max < 9999 && min < 9999) {
+        items.push({ label: date.slice(5), max: max, min: min });
+      }
+    });
+
+    if (items.length < 2) {
+      box.innerHTML = '<div class="wx-trend-empty">暂无趋势数据</div>';
+      return;
+    }
+
+    var w = 760;
+    var h = 240;
+    var pad = { l: 44, r: 26, t: 36, b: 44 };
+    var innerW = w - pad.l - pad.r;
+    var innerH = h - pad.t - pad.b;
+    var hi = Math.max.apply(null, items.map(function (d) { return d.max; }));
+    var lo = Math.min.apply(null, items.map(function (d) { return d.min; }));
+    var span = Math.max(1, hi - lo);
+    var step = innerW / (items.length - 1);
+
+    function px(index) {
+      return pad.l + step * index;
+    }
+
+    function py(value) {
+      return pad.t + innerH * (1 - (value - lo) / span);
+    }
+
+    var hiPoints = items.map(function (d, i) { return px(i) + ',' + py(d.max); }).join(' ');
+    var loPoints = items.map(function (d, i) { return px(i) + ',' + py(d.min); }).join(' ');
+    var area = hiPoints + ' ' + items.slice().reverse().map(function (d) {
+      return px(items.indexOf(d)) + ',' + py(d.min);
+    }).join(' ');
+
+    var grid = [0, 0.5, 1].map(function (ratio) {
+      var y = pad.t + innerH * ratio;
+      var value = Math.round(hi - span * ratio);
+
+      return '<line x1="' + pad.l + '" y1="' + y + '" x2="' + (w - pad.r) + '" y2="' + y + '" stroke="#eef3f2" stroke-width="1"/>'
+        + '<text x="' + (pad.l - 10) + '" y="' + (y + 3) + '" text-anchor="end" font-size="10" fill="#9aabaa">' + value + '°</text>';
+    }).join('');
+
+    var dots = items.map(function (d, i) {
+      return '<circle cx="' + px(i) + '" cy="' + py(d.max) + '" r="3.6" fill="#16baaa"/>'
+        + '<circle cx="' + px(i) + '" cy="' + py(d.min) + '" r="3.6" fill="#6b8cff"/>';
+    }).join('');
+
+    var labels = items.map(function (d, i) {
+      return '<text x="' + px(i) + '" y="' + (py(d.max) - 10) + '" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0e8f83">' + Math.round(d.max) + '°</text>'
+        + '<text x="' + px(i) + '" y="' + (py(d.min) + 17) + '" text-anchor="middle" font-size="10.5" fill="#6b8cff">' + Math.round(d.min) + '°</text>';
+    }).join('');
+
+    var dates = items.map(function (d, i) {
+      return '<text x="' + px(i) + '" y="' + (h - 14) + '" text-anchor="middle" font-size="10" fill="#7a9291">' + escapeHtml(d.label) + '</text>';
+    }).join('');
+
+    box.innerHTML = '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="未来气温趋势">'
+      + '<defs><linearGradient id="wxTrendGrad" x1="0" y1="0" x2="0" y2="1">'
+      + '<stop offset="0%" stop-color="#16baaa" stop-opacity="0.22"/>'
+      + '<stop offset="100%" stop-color="#16baaa" stop-opacity="0"/>'
+      + '</linearGradient></defs>'
+      + grid
+      + '<polygon points="' + area + '" fill="url(#wxTrendGrad)"/>'
+      + '<polyline points="' + hiPoints + '" fill="none" stroke="#16baaa" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'
+      + '<polyline points="' + loPoints + '" fill="none" stroke="#6b8cff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
+      + dots
+      + labels
+      + dates
+      + '</svg>';
   }
 
   function renderForecast(data) {
@@ -268,6 +353,87 @@
         + '<span class="wx-day-rain">降水 ' + escapeHtml(show(item.precipitation, '%')) + '</span>'
         + '</article>';
     }).join('');
+  }
+
+  function initPlayer() {
+    var audio = el('wx-audio');
+    var card = el('wx-player');
+    var button = el('wx-play');
+    var bar = el('wx-progress');
+    var fill = el('wx-fill');
+    var time = el('wx-time');
+    var status = el('wx-state');
+
+    if (!audio || !card || !button || !bar || !fill || !time) {
+      return;
+    }
+
+    var icon = button.querySelector('i');
+
+    function format(seconds) {
+      if (!isFinite(seconds) || seconds < 0) {
+        return '00:00';
+      }
+
+      var min = Math.floor(seconds / 60);
+      var sec = Math.floor(seconds % 60);
+
+      return (min < 10 ? '0' : '') + min + ':' + (sec < 10 ? '0' : '') + sec;
+    }
+
+    function paint() {
+      var duration = isFinite(audio.duration) ? audio.duration : 0;
+      var progress = duration > 0 ? Math.min(1, audio.currentTime / duration) : 0;
+
+      fill.style.width = (progress * 100) + '%';
+      time.textContent = format(audio.currentTime) + ' / ' + format(duration);
+    }
+
+    button.addEventListener('click', function () {
+      if (audio.paused) {
+        audio.play().catch(function () {
+          notify('音频播放失败，请检查文件或浏览器权限');
+        });
+      } else {
+        audio.pause();
+      }
+    });
+
+    audio.addEventListener('play', function () {
+      card.classList.add('is-playing');
+      icon.className = 'layui-icon layui-icon-pause';
+      button.setAttribute('aria-label', '暂停城市电台');
+      if (status) status.textContent = 'PLAYING';
+    });
+
+    audio.addEventListener('pause', function () {
+      card.classList.remove('is-playing');
+      icon.className = 'layui-icon layui-icon-play';
+      button.setAttribute('aria-label', '播放城市电台');
+      if (status) status.textContent = 'MP3';
+    });
+
+    audio.addEventListener('timeupdate', paint);
+    audio.addEventListener('loadedmetadata', paint);
+    audio.addEventListener('durationchange', paint);
+    audio.addEventListener('ended', paint);
+
+    audio.addEventListener('error', function () {
+      if (status) status.textContent = 'ERROR';
+      notify('音频加载失败');
+    });
+
+    bar.addEventListener('click', function (event) {
+      if (!isFinite(audio.duration) || audio.duration <= 0) {
+        return;
+      }
+
+      var rect = bar.getBoundingClientRect();
+      var ratio = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+
+      audio.currentTime = ratio * audio.duration;
+      paint();
+    });
   }
 
   function bindEvents() {
@@ -319,8 +485,8 @@
       var opened = wrap.classList.toggle('is-open');
 
       this.innerHTML = opened
-        ? '<i class="layui-icon layui-icon-up"></i> 收起原样返回'
-        : '<i class="layui-icon layui-icon-down"></i> 展开原样返回';
+        ? '<i class="layui-icon layui-icon-up"></i> 收起'
+        : '<i class="layui-icon layui-icon-down"></i> 展开';
     });
 
     document.querySelectorAll('.wx-nav a').forEach(function (link) {
@@ -338,6 +504,7 @@
     state.layer = layer;
 
     bindEvents();
+    initPlayer();
 
     loadProvinces()
       .then(function () {
