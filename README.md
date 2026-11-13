@@ -1,137 +1,114 @@
-# youvision/lizi
+# youvision/think-store-weather
 
-ThinkPHP 8 开发期工具箱。提供三样东西：
+ThinkPHP 8 天气查询组件。提供两样东西：
 
-- **内置开发服务器** `php think lizi:serve` —— 不依赖 Nginx/Apache，伪静态与静态资源都能正常跑
-- **请求轨迹中间件** —— 往响应头写入耗时与峰值内存，前端联调时一眼看出慢在哪
-- **端口探测** —— 端口被占时自动顺延，不再出现 "Address already in use"
-
-包名 `lizi` 取"粒子"之意：给每个请求附上一层可观测的轻量粒子。
+- **城市天气页面** —— 省市联动 + 实时天气 + 七天预报，Layui 2.13.9 本地化，默认河南郑州
+- **天气 JSON 接口** —— 代理中国天气网 `nmc.cn`，原样返回上游 JSON，默认缓存 8 小时，支持令牌强制刷新
 
 ## 安装
 
 ```bash
-composer require youvision/lizi --dev
+composer require youvision/think-store-weather
 ```
 
-生产环境不需要它，所以加 `--dev`。若工程里已经在用 ThinkPHP 8，服务会被自动发现（`extra.think.services`）。
-
-如果没生效，手动注册一次：
+若工程里已经在用 ThinkPHP 8，服务会被自动发现（`extra.think.services`），路由也会一并注册。如果没生效，手动注册一次：
 
 ```bash
 php think service:discover
 ```
 
-或者编辑 `vendor/services.php` 后清缓存：
+静态资源（Layui、样式、脚本）由 `/weather/assets/<path>` 路由直接读取包内 `theme/assets` 目录输出，不需要发布到 `public`，也不需要额外的目录写权限。资源前缀可通过 `config/weather.php` 的 `assets` 修改。
 
-```bash
-php think clear
-```
+页面使用 `topthink/think-view` 模板引擎渲染，安装本包时会自动引入，无需额外配置。
 
-## 内置开发服务器
+## 天气页面与接口
 
-```bash
-php think lizi:serve
-php think lizi:serve -H 0.0.0.0 -p 9877
-php think lizi:serve --router server/mock.php
-```
-
-| 选项 | 说明 | 默认 |
+| 方法 | 路由 | 说明 |
 |---|---|---|
-| `-H, --host` | 监听地址 | `127.0.0.1` |
-| `-p, --port` | 监听端口 | `9877`，被占用时自动顺延 |
-| `--router` | 自定义路由脚本 | 包内 `server/router.php` |
+| GET | `/weather` | 天气页面，默认展示河南省 · 郑州（`YVItN`） |
+| GET | `/weather/api/provinces` | 省市联动数据，树形数组，城市 `code` 即 `stationid` |
+| GET | `/weather/api/weather?stationid=YVItN` | 原样返回中国天气网 JSON，默认读缓存 |
+| GET | `/weather/api/refresh?stationid=YVItN&token=xxx` | 强制回源并覆盖缓存 |
+| GET | `/weather/assets/<path>` | 包内静态资源，含 Layui、样式与脚本 |
 
-想用手机或局域网内其他机器访问，必须改成 `-H 0.0.0.0`，否则只监听本机回环地址。
+页面使用包内 `src/data/province.php` 的省/市树，城市节点中的 `code` 直接作为天气接口的 `stationid`。
 
-它会自动处理三件容易踩坑的事：
+天气接口行为：
 
-1. 用 `PHP_BINARY` 启动，而不是 `php`，避免 PATH 指向另一版本
-2. docroot 固定为 `public`，静态资源由内置服务器直出
-3. 覆盖 `SCRIPT_NAME` / `SCRIPT_FILENAME`，ThinkPHP 推导 baseUrl 不会算歪
+- `stationid` 在 `src/data/stationid.php` 白名单内：原样转发 `https://www.nmc.cn/rest/weather?stationid=...` 的响应体，不做字段裁剪
+- `stationid` 为空或不在白名单：自动回退到默认城市郑州（`YVItN`），响应头返回 `X-Weather-Fallback: 1`
+- 上游不可用：返回 HTTP 502 与 `{"code":-1,"msg":"...","data":null}`
 
-路由脚本自带路径穿越防护（拒绝含 `..` 的 URI）。
+响应头会附带 `X-Weather-Station`、`X-Weather-Fallback` 与 `X-Weather-Cache`，用于确认实际站点与缓存状态。
 
-## 请求轨迹中间件
+### 缓存与强制刷新
 
-复制配置到项目：
+- 天气响应默认缓存 **8 小时**（`cache_ttl`，单位秒），缓存键为 `weather:nmc:<stationid>`
+- 命中缓存：`X-Weather-Cache: hit`，不会再请求上游
+- 未命中：`X-Weather-Cache: miss`，请求上游并写入缓存
+- 强制刷新：`X-Weather-Cache: refresh`，忽略缓存、回源并覆盖缓存
+- 刷新令牌无效或未配置：HTTP 403，`X-Weather-Cache: bypass`
+
+在 `config/weather.php` 配置令牌后即可使用：
 
 ```bash
-php think vendor:publish --tag=lizi
+curl 'https://example.com/weather/api/refresh?stationid=YVItN&token=your-token'
 ```
 
-或者手动在 `config/lizi.php` 写入：
+`token` 在 `/weather/api/weather` 上同样生效，带正确令牌时也会强制刷新。令牌留空表示禁用强制刷新。
+
+> 令牌通过查询参数传递，会出现在访问日志中；生产环境建议使用足够长的随机值，并在网关侧限制访问频率。
+
+### 配置
 
 ```php
+// config/weather.php
 return [
-    'trace' => [
-        'enable' => true,
+    // 中国天气网接口
+    'nmc' => [
+        'endpoint' => 'https://www.nmc.cn/rest/weather?stationid=%s',
+        'timeout'  => 8,
+        // 响应缓存时间（秒），默认 8 小时
+        'cache_ttl' => 28800,
+        // 强制刷新令牌，留空表示禁用刷新接口
+        'refresh_token' => '',
     ],
+
+    // 静态资源路由前缀
+    'assets' => '/weather/assets',
 ];
 ```
 
-开启后响应头会多出两个字段：
+路由由服务提供者在 `boot()` 阶段加载，宿主项目不需要复制路由文件。若宿主已有 `/weather` 路径，可自行调整 `src/route/route.php`。
 
-```
-X-Lizi-Cost: 12.34ms
-X-Lizi-Mem: 6.00MB
-```
+页面使用 `topthink/think-view` 的 `Think` 驱动渲染；宿主未配置 `view.type` 时服务提供者会自动设为 `Think`，已有视图配置不受影响。
 
-`config/lizi.php` 里的 `dev_server` 段同样可以覆盖命令的默认参数：
-
-```php
-return [
-    'dev_server' => [
-        'host'   => '127.0.0.1',
-        'port'   => 9877,
-        'router' => '',   // 留空用包内自带脚本
-    ],
-];
-```
-
-> 中间件与开发命令只在 `app_debug = true` 时生效/注册，生产环境不会暴露。
+静态资源路由只允许读取包内 `theme/assets` 目录，路径会经过 `realpath` 校验并拒绝含 `..` 的请求，避免目录穿越。
 
 ## 目录结构
 
 ```
-youvision-lizi/
+think-store-weather/
 ├── composer.json
-├── config/lizi.php          # 默认配置
-├── server/router.php        # php -S 路由脚本
+├── config/weather.php          # 默认配置
+├── theme/                      # 页面模板与前端资源
+│   ├── view/dashboard.html     # 天气页面模板（不对外暴露）
+│   └── assets/                 # 由 /weather/assets/<path> 路由直接输出
+│       ├── layui/              # Layui 2.13.9 本地文件
+│       ├── app.js              # 城市联动与天气渲染
+│       └── site.css            # 页面样式
 ├── src/
-│   ├── Service.php          # 服务提供者
-│   ├── Command/Serve.php    # lizi:serve
-│   ├── Middleware/Trace.php # 请求轨迹
-│   └── Support/Port.php     # 端口工具（纯逻辑，可单测）
+│   ├── Service.php             # 服务提供者（配置合并、路由）
+│   ├── route/route.php         # /weather 路由定义
+│   ├── Controller/WeatherController.php
+│   ├── Controller/AssetController.php
+│   ├── data/province.php       # 省/市站点树
+│   ├── data/stationid.php      # 站点白名单
+│   └── Support/                # Province / Station / NmcWeather / WeatherCache / RefreshToken
 ├── tests/
 ├── phpstan.neon
 └── .github/workflows/ci.yml
 ```
-
-## 本地联调（不发布也能用）
-
-在宿主项目的 `composer.json` 里加 path 仓库：
-
-```json
-{
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../youvision-lizi",
-            "options": { "symlink": true }
-        }
-    ],
-    "require-dev": {
-        "youvision/lizi": "*"
-    }
-}
-```
-
-```bash
-composer update youvision/lizi
-```
-
-符号链接后改包源码即时生效，不用反复 `dump-autoload`；但新增类文件仍要 `composer dump-autoload -o`。
 
 ## 开发
 
@@ -143,6 +120,8 @@ composer check       # 两者一起跑
 ```
 
 CI 矩阵覆盖 PHP 8.0–8.4，并额外跑一次 `--prefer-lowest`，确保 `composer.json` 里的依赖区间没有写窄或写漏。
+
+> 本地若使用自签证书或企业代理导致 PHP curl 报 `self-signed certificate in certificate chain`，需要给 PHP 配置可信 CA（`curl.cainfo` / `openssl.cafile`），而不是关闭 SSL 校验。
 
 ## 发布
 

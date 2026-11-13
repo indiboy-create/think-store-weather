@@ -4,5 +4,6 @@
 /build/
 /.idea/
 /.vscode/
+/.verify-host/
 composer.lock
 *.log

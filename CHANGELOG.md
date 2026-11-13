@@ -8,8 +8,10 @@
 
 ### 新增
 
-- 服务提供者 `Youvision\Lizi\Service`，支持 ThinkPHP 8 自动发现（`extra.think.services`）
-- `php think lizi:serve` 命令：启动内置开发服务器，端口自动顺延
-- `server/router.php`：静态资源直出、伪静态转发、路径穿越防护
-- `Youvision\Lizi\Middleware\Trace`：响应头写入耗时与峰值内存
-- `Youvision\Lizi\Support\Port`：不依赖框架的端口探测工具
+- 服务提供者 `Youvision\ThinkStoreWeather\Service`，支持 ThinkPHP 8 自动发现（`extra.think.services`）
+- 天气模块：`/weather` 页面、`/weather/api/provinces` 省市联动、`/weather/api/weather` 原样转发中国天气网 JSON
+- 天气响应缓存 8 小时（`cache_ttl`），命中返回 `X-Weather-Cache: hit`
+- 强制刷新接口 `/weather/api/refresh`，通过 `token` 校验，令牌配置在 `config/weather.php`
+- 页面使用 `topthink/think-view` 模板引擎渲染 `theme/view/dashboard.html`，模板变量以 `{$var}` 注入
+- 静态资源路由 `/weather/assets/<path>`：直接输出包内 Layui 2.13.9 与页面资源，无需发布到 public
+- 非法站点自动回退默认城市郑州（`YVItN`），并通过 `X-Weather-Fallback` 标记

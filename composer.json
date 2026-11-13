@@ -1,6 +1,6 @@
 {
-    "name": "youvision/lizi",
-    "description": "ThinkPHP 8 开发期粒子级工具箱：内置开发服务器、请求轨迹追踪与端口探测。",
+    "name": "youvision/think-store-weather",
+    "description": "ThinkPHP 8 开发期工具箱：内置开发服务器、请求轨迹追踪与端口探测。",
     "type": "library",
     "keywords": [
         "thinkphp",
@@ -18,7 +18,8 @@
     ],
     "require": {
         "php": ">=8.0",
-        "topthink/framework": "^8.0"
+        "topthink/framework": "^8.0",
+        "topthink/think-view": "^2.0"
     },
     "require-dev": {
         "phpstan/phpstan": "^2.2",
@@ -26,18 +27,18 @@
     },
     "autoload": {
         "psr-4": {
-            "Youvision\\Lizi\\": "src/"
+            "Youvision\\ThinkStoreWeather\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Youvision\\Lizi\\Tests\\": "tests/"
+            "Youvision\\ThinkStoreWeather\\Tests\\": "tests/"
         }
     },
     "extra": {
         "think": {
             "services": [
-                "Youvision\\Lizi\\Service"
+                "Youvision\\ThinkStoreWeather\\Service"
             ]
         }
     },
