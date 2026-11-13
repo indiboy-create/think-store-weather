@@ -16,8 +16,8 @@
 - 上游请求失败时返回可诊断原因（SSL 证书、超时、HTTP 状态），不再统一为模糊提示
 - 响应式天气页面：城市选择、实时天气、温度趋势 SVG、七日预报与原始 JSON 面板
 - 城市电台播放器：`/store/think-store-weather/music` 输出包内 `zhengzhou.mp3`，支持 HTTP Range 与进度拖动
-- 页面使用 `topthink/think-view` 模板引擎渲染 `theme/view/dashboard.html`，模板变量以 `{$var}` 注入
-- 静态资源路由 `/store/assets/<path>`：直接输出包内 Layui 2.13.9 与页面资源，无需发布到 public；页面样式与脚本分类到 `assets/css/site.css` 与 `assets/js/app.js`
+- 新增包内视图渲染器 `src/View.php`，固定 think-view 的 Think 驱动、`theme/view` 模板目录与独立缓存前缀，不依赖宿主视图配置
+- 静态资源路由 `/store/think-store-weather/assets/<path>`：直接输出包内 Layui 2.13.9 与页面资源，无需发布到 public；页面样式与脚本分类到 `assets/css/site.css` 与 `assets/js/app.js`
 - 路由可配置：`weather.route.enabled`、`prefix`、`segment` 与 `middleware`
 - 配置发布：`composer.json` 的 `extra.think.config.weather` 声明默认配置
 - 商店接入：`composer.json` 的 `extra.store.home` 声明发布包首页，供 think-store 读取

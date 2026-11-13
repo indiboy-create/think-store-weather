@@ -71,6 +71,7 @@ foreach ([
     'route/weather.php',
     'src/Service.php',
     'src/Weather.php',
+    'src/View.php',
     'src/Controller/WeatherController.php',
     'src/Controller/AssetController.php',
     'src/Support/RefreshDenied.php',
@@ -121,7 +122,7 @@ $check(str_contains($routeSource, "\$base . 'api/provinces'"), '路由应注册�
 $check(str_contains($routeSource, "\$base . 'api/weather'"), '路由应注册天气接口');
 $check(str_contains($routeSource, "\$base . 'api/refresh'"), '路由应注册刷新接口');
 $check(str_contains($routeSource, "\$base . 'music'"), '路由应注册音乐地址');
-$check(str_contains($routeSource, "Route::get('assets/<path>'"), '路由应注册 GET assets/<path>');
+$check(str_contains($routeSource, "Route::get(\$base . 'assets/<path>'"), '路由应注册带命名空间的静态资源路径');
 $check(str_contains($routeSource, "pattern(['path' => '.*'])"), '资源路由应匹配多级路径');
 $check(str_contains($routeSource, 'Route::group($prefix, $register)'), '路由应统一按前缀分组注册');
 $check(str_contains($routeSource, 'middleware($middleware)'), '路由应应用中间件配置');
@@ -134,6 +135,18 @@ $check(str_contains($serviceSource, "bind('weather'"), '服务应绑定 weather 
 $check(str_contains($serviceSource, 'bind(Weather::class'), '服务应绑定 Weather 类名');
 $check(str_contains($serviceSource, 'mergeConfig'), '服务应合并包内默认配置');
 $check(str_contains($serviceSource, "dirname(__DIR__) . '/route/weather.php'"), '服务应加载顶层路由文件');
+$check(str_contains($serviceSource, 'instance(View::class'), '服务应注册包内视图渲染器');
+
+$viewSource = (string) file_get_contents($packageRoot . '/src/View.php');
+
+$check(str_contains($viewSource, 'think\\view\\driver\\Think'), '渲染器应使用 think-view 的 Think 驱动');
+$check(str_contains($viewSource, "'view_path'"), '渲染器应指定模板目录');
+$check(str_contains($viewSource, '/theme/view/'), '渲染器应指向包内 theme/view 目录');
+$check(str_contains($viewSource, 'cache_path'), '渲染器应配置模板缓存目录');
+$check(str_contains($viewSource, 'getRuntimePath'), '渲染器应使用宿主运行时目录');
+$check(str_contains($viewSource, 'cache_prefix'), '渲染器应使用独立缓存前缀');
+$check(str_contains($viewSource, 'ob_start'), '渲染器应捕获模板输出');
+$check(str_contains($viewSource, 'templateFile'), '渲染器应解析完整模板路径');
 
 $controllerSource = (string) file_get_contents($packageRoot . '/src/Controller/WeatherController.php');
 
@@ -142,6 +155,8 @@ foreach (['index', 'provinces', 'weather', 'refresh', 'music'] as $method) {
 }
 
 $check(str_contains($controllerSource, 'Weather $weather'), '控制器应注入核心服务');
+$check(str_contains($controllerSource, 'View $view'), '控制器应注入包内渲染器');
+$check(str_contains($controllerSource, "\$this->view->render('dashboard'"), '控制器应通过包内渲染器输出页面');
 $check(str_contains($controllerSource, 'function version'), '控制器应提供版本回退');
 $check(str_contains($controllerSource, "'dev'"), '控制器应提供开发版本回退');
 $check(str_contains($controllerSource, 'InstalledVersions'), '控制器应从 Composer 运行时读取版本');
@@ -173,7 +188,7 @@ $check(!str_contains($template, 'cdn'), '页面模板不应使用 CDN 资源');
 $readme = (string) file_get_contents($packageRoot . '/README.md');
 
 $check(str_contains($readme, '/store/think-store-weather/index'), 'README 应说明默认页面地址');
-$check(str_contains($readme, '/store/assets/<path>'), 'README 应说明静态资源地址');
+$check(str_contains($readme, '/store/think-store-weather/assets/<path>'), 'README 应说明静态资源地址');
 $check(str_contains($readme, "app('weather')"), 'README 应说明容器调用方式');
 $check(str_contains($readme, 'extra.store.home'), 'README 应说明商店首页声明');
 $check(str_contains($readme, 'composer verify'), 'README 应说明 verify 脚本');

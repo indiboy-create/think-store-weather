@@ -6,7 +6,6 @@ namespace Youvision\ThinkStoreWeather;
 
 use think\Service as BaseService;
 
-
 /**
  * 服务提供者。
  *
@@ -18,11 +17,7 @@ class Service extends BaseService
     {
         $this->mergeConfig();
         $this->bindWeather();
-
-        // 页面依赖 think-view 提供的 Think 驱动；宿主已有视图配置时保持原样
-        if (!$this->app->config->has('view.type')) {
-            $this->app->config->set(['view' => ['type' => 'Think']]);
-        }
+        $this->app->instance(View::class, new View($this->app));
     }
 
     public function boot(): void

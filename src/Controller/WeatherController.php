@@ -7,10 +7,10 @@ namespace Youvision\ThinkStoreWeather\Controller;
 use think\facade\Config;
 use think\Request;
 use think\response\Json;
-use think\response\View;
 use Youvision\ThinkStoreWeather\Support\AudioRange;
 use Youvision\ThinkStoreWeather\Support\RefreshDenied;
 use Youvision\ThinkStoreWeather\Support\Station;
+use Youvision\ThinkStoreWeather\View;
 use Youvision\ThinkStoreWeather\Weather;
 
 /**
@@ -22,19 +22,19 @@ use Youvision\ThinkStoreWeather\Weather;
  * - GET /store/think-store-weather/api/weather      天气 JSON（默认读缓存）
  * - GET /store/think-store-weather/api/refresh      强制刷新天气 JSON（需 token）
  * - GET /store/think-store-weather/music            页面背景音乐（支持 Range）
- * - GET /store/assets/<path>                        包内静态资源（Layui、样式、脚本）
+ * - GET /store/think-store-weather/assets/<path>     包内静态资源（Layui、样式、脚本）
  */
 class WeatherController
 {
     private const AUDIO_FILE = '/data/zhengzhou.mp3';
 
-    public function __construct(private Weather $weather)
+    public function __construct(private Weather $weather, private View $view)
     {
     }
 
-    public function index(): View
+    public function index(): \think\Response
     {
-        return view(dirname(__DIR__, 2) . '/theme/view/dashboard.html', [
+        return response($this->view->render('dashboard', [
             'asset'            => $this->assetBase(),
             'api_base'         => $this->routeBase() . '/api',
             'music_url'        => $this->routeBase() . '/music',
@@ -42,7 +42,7 @@ class WeatherController
             'default_station'  => Station::DEFAULT_CODE,
             'default_city'     => Station::DEFAULT_CITY,
             'default_province' => Station::DEFAULT_PROVINCE,
-        ]);
+        ]));
     }
 
     public function provinces(): Json
@@ -166,9 +166,9 @@ class WeatherController
             return rtrim($raw, '/');
         }
 
-        $prefix = trim((string) Config::get('weather.route.prefix', 'store'), '/');
+        $base = $this->routeBase();
 
-        return ($prefix === '' ? '' : '/' . $prefix) . '/' . trim($raw, '/');
+        return ($base === '' ? '' : $base) . '/' . trim($raw, '/');
     }
 
     /**

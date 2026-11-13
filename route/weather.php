@@ -32,7 +32,7 @@ $register = static function () use ($segment): void {
     Route::get($base . 'music', [WeatherController::class, 'music'])->name('weather.music')->completeMatch();
 
     // 静态资源直接由路由输出，无需发布到 public
-    Route::get('assets/<path>', [AssetController::class, 'file'])
+    Route::get($base . 'assets/<path>', [AssetController::class, 'file'])
         ->pattern(['path' => '.*'])
         ->name('weather.asset');
 };
