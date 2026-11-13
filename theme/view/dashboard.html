@@ -15,13 +15,16 @@
       <span class="wx-brand-mark"><i class="layui-icon layui-icon-light"></i></span>
       <span>Weather<small>THINK STORE WEATHER</small></span>
     </a>
-    <nav class="wx-nav">
+    <nav class="wx-nav" id="wx-nav">
       <a class="is-active" href="#wx-now">实时</a>
       <a href="#wx-trend">趋势</a>
       <a href="#wx-forecast">预报</a>
       <a href="#wx-api">接口</a>
     </nav>
     <span class="wx-source"><i class="layui-icon layui-icon-fire"></i> 实时数据</span>
+    <button type="button" class="wx-nav-toggle" id="wx-nav-toggle" aria-label="打开导航" aria-expanded="false" aria-controls="wx-nav">
+      <i class="layui-icon layui-icon-spread-left"></i>
+    </button>
   </div>
 </header>
 
@@ -75,6 +78,26 @@
             默认展示 <strong>{$default_province} · {$default_city}</strong>
             <span class="wx-code">{$default_station}</span>
           </p>
+
+          <aside class="wx-player" id="wx-player">
+            <button type="button" class="wx-play" id="wx-play" aria-label="播放城市电台">
+              <i class="layui-icon layui-icon-play"></i>
+            </button>
+            <div class="wx-player-main">
+              <div class="wx-player-row">
+                <span class="wx-player-name">
+                  <i class="layui-icon layui-icon-music"></i>
+                  <span id="wx-player-city">{$default_city}</span> · 城市电台
+                </span>
+                <span class="wx-player-time" id="wx-time">00:00 / 00:00</span>
+              </div>
+              <div class="wx-progress" id="wx-progress" title="点击跳转">
+                <div class="wx-progress-fill" id="wx-fill"></div>
+              </div>
+            </div>
+            <span class="wx-player-state" id="wx-state">MP3</span>
+            <audio id="wx-audio" preload="metadata" src="{$music_url}"></audio>
+          </aside>
         </div>
       </aside>
     </div>
@@ -196,32 +219,73 @@
         <span>静态资源由 <code>{$asset}/&lt;path&gt;</code> 路由直接输出，无需发布到 public。</span>
       </div>
     </section>
+
+    <section class="wx-section" id="wx-start">
+      <div class="wx-cta">
+        <div class="wx-cta-text">
+          <span class="wx-eyebrow">Get started</span>
+          <h2>从 Composer 开始，按需接入</h2>
+          <p>youvision/think-store-weather 以 Composer 包形式发布，路由、缓存与页面都可按项目需要开启或替换；仓库、README 与 Issue 都在 GitHub。</p>
+        </div>
+        <div class="wx-cta-actions">
+          <a class="wx-btn wx-btn-primary" href="https://github.com/indiboy-create/think-store-weather" target="_blank" rel="noopener">
+            <i class="layui-icon layui-icon-log"></i> 访问 GitHub
+          </a>
+          <a class="wx-btn wx-btn-ghost" href="#wx-api">查看接口</a>
+        </div>
+      </div>
+    </section>
   </div>
 </main>
 
 <footer class="wx-footer">
-  <div class="wx-container wx-footer-inner">
-    <span>Weather · think-store-weather</span>
-    <span>实时天气数据 · Built with Layui 2.13.9</span>
+  <div class="wx-container">
+    <div class="wx-footer-grid">
+      <div class="wx-footer-brand-col">
+        <a class="wx-brand wx-footer-brand" href="#wx-top">
+          <span class="wx-brand-mark"><i class="layui-icon layui-icon-light"></i></span>
+          <span>Weather<small>THINK STORE WEATHER</small></span>
+        </a>
+        <p class="wx-footer-desc">
+          youvision/think-store-weather：面向 ThinkPHP 8 的天气查询组件，提供城市联动、实时天气接口与响应式页面。
+        </p>
+      </div>
+      <div>
+        <h4>能力</h4>
+        <div class="wx-footer-links">
+          <a href="#wx-now">实时天气</a>
+          <a href="#wx-trend">温度趋势</a>
+          <a href="#wx-forecast">七日预报</a>
+          <a href="#wx-api">接口说明</a>
+        </div>
+      </div>
+      <div>
+        <h4>接口</h4>
+        <div class="wx-footer-links">
+          <a href="{$api_base}/provinces">省市联动</a>
+          <a href="{$api_base}/weather?stationid=YVItN">天气 JSON</a>
+          <a href="#wx-start">强制刷新</a>
+          <a href="{$music_url}">城市电台</a>
+        </div>
+      </div>
+      <div>
+        <h4>资源</h4>
+        <div class="wx-footer-links">
+          <a href="https://github.com/indiboy-create/think-store-weather" target="_blank" rel="noopener">GitHub 仓库</a>
+          <a href="https://github.com/indiboy-create/think-store-weather#readme" target="_blank" rel="noopener">使用文档</a>
+          <a href="https://layui.dev/" target="_blank" rel="noopener">Layui 文档</a>
+          <a href="https://www.thinkphp.cn/" target="_blank" rel="noopener">ThinkPHP 官网</a>
+        </div>
+      </div>
+    </div>
+    <div class="wx-footer-bottom">
+      <span>© 2026 youvision/think-store-weather</span>
+      <span>Built with ThinkPHP 8 · Layui 2.13.9</span>
+    </div>
   </div>
 </footer>
 
-<aside class="wx-player" id="wx-player">
-  <button type="button" class="wx-play" id="wx-play" aria-label="播放城市电台">
-    <i class="layui-icon layui-icon-play"></i>
-  </button>
-  <div class="wx-player-main">
-    <div class="wx-player-row">
-      <span class="wx-player-name"><i class="layui-icon layui-icon-music"></i> 郑州 · 城市电台</span>
-      <span class="wx-player-time" id="wx-time">00:00 / 00:00</span>
-    </div>
-    <div class="wx-progress" id="wx-progress" title="点击跳转">
-      <div class="wx-progress-fill" id="wx-fill"></div>
-    </div>
-  </div>
-  <span class="wx-player-state" id="wx-state">MP3</span>
-  <audio id="wx-audio" preload="metadata" src="{$music_url}"></audio>
-</aside>
+
 
 <script>
   window.WEATHER_CONFIG = {

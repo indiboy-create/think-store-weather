@@ -16,4 +16,5 @@
 - 城市电台播放器：`/weather/music` 输出包内 `zhengzhou.mp3`，支持 HTTP Range 与进度拖动
 - 页面使用 `topthink/think-view` 模板引擎渲染 `theme/view/dashboard.html`，模板变量以 `{$var}` 注入
 - 静态资源路由 `/weather/assets/<path>`：直接输出包内 Layui 2.13.9 与页面资源，无需发布到 public
+- 路由可配置：`weather.route.enabled`、`prefix` 与 `middleware`，静态资源路径支持相对前缀
 - 非法站点自动回退默认城市郑州（`YVItN`），并通过 `X-Weather-Fallback` 标记

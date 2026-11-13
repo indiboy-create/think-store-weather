@@ -33,8 +33,8 @@ class WeatherController
     {
         return view(dirname(__DIR__, 2) . '/theme/view/dashboard.html', [
             'asset'            => $this->assetBase(),
-            'api_base'         => '/weather/api',
-            'music_url'        => '/weather/music',
+            'api_base'         => $this->routeBase() . '/api',
+            'music_url'        => $this->routeBase() . '/music',
             'default_station'  => Station::DEFAULT_CODE,
             'default_city'     => Station::DEFAULT_CITY,
             'default_province' => Station::DEFAULT_PROVINCE,
@@ -163,10 +163,25 @@ class WeatherController
         ]);
     }
 
+    private function routeBase(): string
+    {
+        $prefix = trim((string) Config::get('weather.route.prefix', 'weather'), '/');
+
+        return $prefix === '' ? '' : '/' . $prefix;
+    }
+
     private function assetBase(): string
     {
-        $prefix = trim((string) Config::get('weather.assets', AssetController::PREFIX), '/');
+        $raw = trim((string) Config::get('weather.assets', 'assets'));
 
-        return '/' . ($prefix === '' ? trim(AssetController::PREFIX, '/') : $prefix);
+        if ($raw === '') {
+            $raw = 'assets';
+        }
+
+        if (str_starts_with($raw, '/')) {
+            return rtrim($raw, '/');
+        }
+
+        return $this->routeBase() . '/' . trim($raw, '/');
     }
 }

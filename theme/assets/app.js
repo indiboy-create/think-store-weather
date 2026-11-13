@@ -212,6 +212,13 @@
       || cfg.defaultCity;
 
     el('wx-city').textContent = cityName;
+
+    var playerCity = el('wx-player-city');
+
+    if (playerCity) {
+      playerCity.textContent = cityName;
+    }
+
     el('wx-publish').textContent = real.publish_time ? '更新于 ' + real.publish_time : '更新时间未知';
     el('wx-temp').textContent = fixed(weather.temperature, 1);
     el('wx-info').textContent = isMissing(weather.info) ? '天气现象暂无' : weather.info;
@@ -436,6 +443,77 @@
     });
   }
 
+  function initNav() {
+    var toggle = el('wx-nav-toggle');
+    var nav = el('wx-nav');
+
+    if (!toggle || !nav) {
+      return;
+    }
+
+    var icon = toggle.querySelector('i');
+
+    function close() {
+      nav.classList.remove('is-open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', '打开导航');
+
+      if (icon) {
+        icon.className = 'layui-icon layui-icon-spread-left';
+      }
+    }
+
+    function open() {
+      nav.classList.add('is-open');
+      toggle.setAttribute('aria-expanded', 'true');
+      toggle.setAttribute('aria-label', '关闭导航');
+
+      if (icon) {
+        icon.className = 'layui-icon layui-icon-close';
+      }
+    }
+
+    toggle.addEventListener('click', function (event) {
+      event.stopPropagation();
+
+      if (nav.classList.contains('is-open')) {
+        close();
+      } else {
+        open();
+      }
+    });
+
+    nav.addEventListener('click', function (event) {
+      if (event.target instanceof Element && event.target.closest('a')) {
+        close();
+      }
+    });
+
+    document.addEventListener('click', function (event) {
+      if (!nav.classList.contains('is-open')) {
+        return;
+      }
+
+      if (nav.contains(event.target) || toggle.contains(event.target)) {
+        return;
+      }
+
+      close();
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        close();
+      }
+    });
+
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 820) {
+        close();
+      }
+    });
+  }
+
   function bindEvents() {
     var provinceEl = document.querySelector('select[name="province"]');
     var cityEl = document.querySelector('select[name="city"]');
@@ -504,6 +582,7 @@
     state.layer = layer;
 
     bindEvents();
+    initNav();
     initPlayer();
 
     loadProvinces()

@@ -36,10 +36,14 @@ class Service extends BaseService
     }
 
     /**
-     * 加载包内路由定义，宿主项目无需复制路由文件。
+     * 加载包内路由定义；关闭 weather.route.enabled 时交给主项目自行注册。
      */
     private function loadRoutes(): void
     {
+        if (!$this->app->config->get('weather.route.enabled', true)) {
+            return;
+        }
+
         $route = __DIR__ . '/route/route.php';
 
         if (is_file($route)) {
