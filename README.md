@@ -1,10 +1,16 @@
 # youvision/think-store-weather
 
-ThinkPHP 8 天气查询组件。提供三样东西：
+面向 ThinkPHP 8 的天气模块，可作为 `youvision/think-store-*` 发布包接入 think-store 商店：
 
 - **城市天气页面** —— 省市联动 + 实时天气 + 温度趋势 + 七天预报，响应式布局，Layui 2.13.9 本地化，默认河南郑州
 - **天气 JSON 接口** —— 代理远程天气接口，原样返回上游 JSON，默认缓存 8 小时，支持令牌强制刷新
 - **城市电台** —— 首屏城市选择卡内置播放器，播放包内 `zhengzhou.mp3`，支持进度拖动
+
+## 环境要求
+
+- PHP >= 8.0
+- ThinkPHP 8 主项目
+- `topthink/think-view`（随本包自动安装）
 
 ## 安装
 
@@ -12,28 +18,59 @@ ThinkPHP 8 天气查询组件。提供三样东西：
 composer require youvision/think-store-weather
 ```
 
-若工程里已经在用 ThinkPHP 8，服务会被自动发现（`extra.think.services`），路由也会一并注册。如果没生效，手动注册一次：
+ThinkPHP 8 项目通常在 `composer.json` 的 `post-autoload-dump` 中执行 `service:discover` 与 `vendor:publish`，安装后会自动完成服务注册与配置发布。若主项目未配置该脚本，请手动执行：
 
 ```bash
 php think service:discover
+php think vendor:publish
 ```
 
-静态资源（Layui、样式、脚本）由 `/weather/assets/<path>` 路由直接读取包内 `theme/assets` 目录输出，不需要发布到 `public`，也不需要额外的目录写权限。资源前缀可通过 `config/weather.php` 的 `assets` 修改。
+配置声明在 `composer.json` 的 `extra.think.config.weather`，发布后可在主项目 `config/weather.php` 覆盖。
 
-页面使用 `topthink/think-view` 模板引擎渲染，安装本包时会自动引入，无需额外配置。
+## 路由
 
-## 天气页面与接口
-
-| 方法 | 路由 | 说明 |
+| 方法 | 地址 | 说明 |
 |---|---|---|
-| GET | `/weather` | 天气页面，默认展示河南省 · 郑州（`YVItN`） |
-| GET | `/weather/api/provinces` | 省市联动数据，树形数组，城市 `code` 即 `stationid` |
-| GET | `/weather/api/weather?stationid=YVItN` | 原样返回上游天气 JSON，默认读缓存 |
-| GET | `/weather/api/refresh?stationid=YVItN&token=xxx` | 强制回源并覆盖缓存 |
-| GET | `/weather/assets/<path>` | 包内静态资源，含 Layui、样式与脚本 |
-| GET | `/weather/music` | 页面背景音乐，支持 HTTP Range 与进度拖动 |
+| GET | `/store/think-store-weather/index` | 天气页面，默认展示河南省 · 郑州（`YVItN`） |
+| GET | `/store/think-store-weather/api/provinces` | 省市联动数据，树形数组，城市 `code` 即 `stationid` |
+| GET | `/store/think-store-weather/api/weather?stationid=YVItN` | 原样返回上游天气 JSON，默认读缓存 |
+| GET | `/store/think-store-weather/api/refresh?stationid=YVItN&token=xxx` | 强制回源并覆盖缓存 |
+| GET | `/store/assets/<path>` | 包内静态资源，含 Layui、样式与脚本 |
+| GET | `/store/think-store-weather/music` | 页面背景音乐，支持 HTTP Range 与进度拖动 |
 
-页面使用包内 `src/data/province.php` 的省/市树，城市节点中的 `code` 直接作为天气接口的 `stationid`。
+路由由 `Youvision\ThinkStoreWeather\Service` 在 `boot()` 阶段加载，宿主项目不需要复制路由文件。路由前缀由 `config/weather.php` 的 `route.prefix` 控制，默认 `store`；包内命名空间由 `route.segment` 控制，默认 `think-store-weather`。设为空字符串时地址变为 `/index`、`/api/provinces` 等。
+
+## 商店首页
+
+`composer.json` 的 `extra.store.home` 声明了页面入口：
+
+```json
+{
+  "extra": {
+    "store": {
+      "home": "/store/think-store-weather/index"
+    }
+  }
+}
+```
+
+think-store 商店会读取该字段作为发布包的「访问」地址。
+
+## 页面与静态资源
+
+- 模板位于包内 `theme/view/dashboard.html`，由 think-view 的 `Think` 驱动渲染，不需要复制到主项目。
+- 静态资源由 `AssetController` 读取 `theme/assets` 后输出，路径经过 `realpath` 校验并拒绝 `..`，避免目录穿越。
+- 资源响应带 `Cache-Control: public, max-age=86400`，字体、CSS、JS、图片等类型会返回对应的 `Content-Type`。
+- 模板内的接口地址、资源地址与音乐地址会跟随 `route.prefix`、`route.segment` 与 `assets` 自动变化。
+
+```
+/store/think-store-weather/index
+/store/assets/layui/css/layui.css
+```
+
+## 查询接口
+
+GET `/store/think-store-weather/api/weather?stationid=YVItN`
 
 天气接口行为：
 
@@ -54,87 +91,130 @@ php think service:discover
 在 `config/weather.php` 配置令牌后即可使用：
 
 ```bash
-curl 'https://example.com/weather/api/refresh?stationid=YVItN&token=your-token'
+curl 'https://example.com/store/think-store-weather/api/refresh?stationid=YVItN&token=your-token'
 ```
 
-`token` 在 `/weather/api/weather` 上同样生效，带正确令牌时也会强制刷新。令牌留空表示禁用强制刷新。
+`token` 在 `/api/weather` 上同样生效，带正确令牌时也会强制刷新。令牌留空表示禁用强制刷新。
 
 > 令牌通过查询参数传递，会出现在访问日志中；生产环境建议使用足够长的随机值，并在网关侧限制访问频率。
 
-### 配置
+## 配置
+
+配置文件位于 `config/weather.php`，发布后可在主项目中覆盖：
+
+| 配置项 | 默认值 | 说明 |
+|---|---|---|
+| `route.enabled` | `true` | 是否自动注册页面、查询与资源路由；关闭后由主项目自行注册 |
+| `route.prefix` | `store` | 路由前缀，留空表示不添加前缀 |
+| `route.segment` | `think-store-weather` | 包内命名空间，留空表示页面直接挂在路由前缀下 |
+| `route.middleware` | `[]` | 应用到整组路由的中间件，可填写类名或别名 |
+| `api.endpoint` | 远程接口 | 上游地址，`%s` 接收站点编码 |
+| `api.referer` | 上游站点 | 请求时携带的 Referer，留空则不发送 |
+| `api.timeout` | `8` | 请求超时（秒） |
+| `api.cache_ttl` | `28800` | 响应缓存时间（秒） |
+| `api.refresh_token` | `''` | 强制刷新令牌，留空表示禁用 |
+| `assets` | `assets` | 静态资源路径，相对路径会拼在路由前缀后 |
+
+`Service` 会自动合并包内默认配置与主项目配置，项目侧配置优先。修改后清除 `runtime` 缓存即可生效。
 
 ```php
 // config/weather.php
 return [
-    // 远程天气接口
     'api' => [
-        'endpoint' => 'https://example.com/rest/weather?stationid=%s',
-        'timeout'  => 8,
-        // 响应缓存时间（秒），默认 8 小时
-        'cache_ttl' => 28800,
-        // 强制刷新令牌，留空表示禁用刷新接口
+        'endpoint'      => 'https://example.com/rest/weather?stationid=%s',
+        'referer'       => 'https://example.com/',
+        'timeout'       => 8,
+        'cache_ttl'     => 28800,
         'refresh_token' => '',
     ],
-
-    // 路由配置
     'route' => [
-        // 是否启用内置路由；关闭后由主项目自行注册
-        'enabled' => true,
-
-        // 路由前缀
-        'prefix' => 'weather',
-
-        // 应用到全部路由上的中间件，例如 [\app\middleware\Auth::class]
-        // 生产环境请务必配置登录鉴权中间件，避免权限问题
+        'enabled'    => true,
+        'prefix'     => 'store',
+        'segment'    => 'think-store-weather',
         'middleware' => [],
     ],
-
-    // 静态资源路径：相对路径会拼在路由前缀后，也可填写以 / 开头的绝对路径
     'assets' => 'assets',
 ];
 ```
 
-路由由服务提供者在 `boot()` 阶段加载，宿主项目不需要复制路由文件。`prefix` 改变后，页面内的接口、资源与音乐地址会自动跟随；`enabled` 设为 `false` 时，由主项目自行注册路由。`middleware` 会应用到整组路由，生产环境务必配置登录鉴权。
+生产环境请务必通过 `route.middleware` 配置登录鉴权中间件。
 
-页面使用 `topthink/think-view` 的 `Think` 驱动渲染；宿主未配置 `view.type` 时服务提供者会自动设为 `Think`，已有视图配置不受影响。
+## PHP 调用
 
-静态资源路由只允许读取包内 `theme/assets` 目录，路径会经过 `realpath` 校验并拒绝含 `..` 的请求，避免目录穿越。
+服务注册后，可通过容器获取 `Weather`：
+
+```php
+use Youvision\ThinkStoreWeather\Weather;
+
+/** @var Weather $weather */
+$weather = app('weather');
+// 也可使用类名：app(Weather::class)
+
+// 省市联动树
+$tree = $weather->provinces();
+
+// 查询天气，返回 body / stationid / fallback / cache
+$result = $weather->query('YVItN');
+
+// 强制刷新
+$result = $weather->query('YVItN', true, 'your-token');
+```
+
+`Weather` 构造函数支持脱离容器使用：
+
+```php
+$weather = new Weather(
+    'https://example.com/rest/weather?stationid=%s',
+    8,
+    28800,
+    'your-token'
+);
+```
 
 ## 目录结构
 
 ```
 think-store-weather/
-├── composer.json
-├── config/weather.php          # 默认配置
-├── theme/                      # 页面模板与前端资源
-│   ├── view/dashboard.html     # 天气页面模板（不对外暴露）
-│   └── assets/                 # 由 /weather/assets/<path> 路由直接输出
-│       ├── layui/              # Layui 2.13.9 本地文件
-│       ├── app.js              # 城市联动、趋势图与电台播放器
-│       └── site.css            # 页面样式
-├── src/
-│   ├── Service.php             # 服务提供者（配置合并、路由）
-│   ├── route/route.php         # /weather 路由定义
-│   ├── Controller/WeatherController.php
-│   ├── Controller/AssetController.php
-│   ├── data/province.php       # 省/市站点树
-│   ├── data/stationid.php      # 站点白名单
-│   ├── data/zhengzhou.mp3      # 页面背景音乐
-│   └── Support/                # Province / Station / WeatherClient / WeatherCache / RefreshToken / AudioRange
-├── tests/
-└── phpstan.neon
+├─ composer.json
+├─ config/
+│  └─ weather.php                 # 天气配置
+├─ route/
+│  └─ weather.php                 # 页面、查询与资源路由
+├─ src/
+│  ├─ Service.php                 # ThinkPHP 服务注册
+│  ├─ Weather.php                 # 核心服务：省市数据、缓存与回源
+│  ├─ Controller/
+│  │  ├─ WeatherController.php    # 页面渲染、查询接口与音乐输出
+│  │  └─ AssetController.php      # 包内静态资源输出
+│  ├─ Support/                    # Province / Station / WeatherClient / WeatherCache / RefreshToken / AudioRange
+│  └─ data/                       # 省市站点树、站点白名单与本地音频
+├─ theme/
+│  ├─ view/dashboard.html         # 天气页面模板
+│  └─ assets/                     # Layui、页面样式与脚本
+├─ tests/
+├─ phpstan.neon
+└─ phpunit.xml
 ```
 
-## 开发
+## 验证
 
 ```bash
-composer install
 composer test        # PHPUnit
+composer verify      # 结构与配置校验脚本
 composer analyse     # PHPStan level 5
-composer check       # 两者一起跑
+composer check       # 三者一起跑
 ```
 
-> 本地若使用自签证书或企业代理导致 PHP curl 报 `self-signed certificate in certificate chain`，需要给 PHP 配置可信 CA（`curl.cainfo` / `openssl.cafile`），而不是关闭 SSL 校验。
+`tests/verify.php` 会检查 `composer.json` 的依赖、服务注册、配置发布与商店首页声明，默认配置、路由定义、控制器与资源解析，并实际调用 `Weather` 服务验证白名单回退、强制刷新令牌与资源目录穿越防护。
+
+> 若接口返回「天气服务暂时不可用：SSL 证书校验失败，请检查 PHP 的 curl.cainfo 配置」，说明 PHP curl 未加载 CA，而不是上游不可用。请在 `php.ini` 中配置：
+>
+> ```ini
+> curl.cainfo = "C:\path\to\ca-bundle.crt"
+> openssl.cafile = "C:\path\to\ca-bundle.crt"
+> ```
+>
+> Windows 可直接使用 Git for Windows 自带的证书文件（如 `C:\Program Files\Git\ucrt64\etc\ssl\certs\ca-bundle.crt`，部分版本为 `mingw64`）。不要通过关闭 SSL 校验来绕过。
 
 ## 发布
 
@@ -149,6 +229,16 @@ git push origin v0.1.0
 - 分支 `1.x` 与 tag `v1.x.y` 对应
 - 发布前先跑 `composer validate --strict`
 
-## License
+## 许可证
 
-MIT
+MIT，详见 `LICENSE`。
+
+## 相关项目
+
+- [youvision/think-store](https://github.com/indiboy-create/think-store)：ThinkPHP 8 商店管理扩展。
+- [ThinkPHP-PanGu](https://github.com/indiboy-create/ThinkPHP-PanGu)：面向 ThinkPHP 的开源工程索引。
+
+## ThinkPHP-PanGu - 盘古ThinkPHP开源索引!
+面向 ThinkPHP 的开源工程索引：组件、框架、服务与发布工具，按能力组织，持续整理。
+- 仓库地址：**<https://github.com/indiboy-create/ThinkPHP-PanGu/>**
+- 在线站点：**<https://indiboy-create.github.io/ThinkPHP-PanGu/>**

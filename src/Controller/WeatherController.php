@@ -6,28 +6,31 @@ namespace Youvision\ThinkStoreWeather\Controller;
 
 use think\facade\Config;
 use think\Request;
+use think\response\Json;
 use think\response\View;
 use Youvision\ThinkStoreWeather\Support\AudioRange;
-use Youvision\ThinkStoreWeather\Support\Province;
-use Youvision\ThinkStoreWeather\Support\RefreshToken;
+use Youvision\ThinkStoreWeather\Support\RefreshDenied;
 use Youvision\ThinkStoreWeather\Support\Station;
-use Youvision\ThinkStoreWeather\Support\WeatherCache;
-use Youvision\ThinkStoreWeather\Support\WeatherClient;
+use Youvision\ThinkStoreWeather\Weather;
 
 /**
  * 天气查询页面与 JSON 接口。
  *
- * 路由由服务提供者统一注册，默认前缀 /weather：
- * - GET /weather                     页面（think-view 渲染）
- * - GET /weather/api/provinces       省市联动数据
- * - GET /weather/api/weather         天气 JSON（默认读缓存）
- * - GET /weather/api/refresh         强制刷新天气 JSON（需 token）
- * - GET /weather/assets/<path>       包内静态资源（Layui、样式、脚本）
- * - GET /weather/music               页面背景音乐（支持 Range）
+ * 路由由服务提供者统一注册，默认地址：
+ * - GET /store/think-store-weather/index            页面（think-view 渲染）
+ * - GET /store/think-store-weather/api/provinces    省市联动数据
+ * - GET /store/think-store-weather/api/weather      天气 JSON（默认读缓存）
+ * - GET /store/think-store-weather/api/refresh      强制刷新天气 JSON（需 token）
+ * - GET /store/think-store-weather/music            页面背景音乐（支持 Range）
+ * - GET /store/assets/<path>                        包内静态资源（Layui、样式、脚本）
  */
 class WeatherController
 {
     private const AUDIO_FILE = '/data/zhengzhou.mp3';
+
+    public function __construct(private Weather $weather)
+    {
+    }
 
     public function index(): View
     {
@@ -35,15 +38,16 @@ class WeatherController
             'asset'            => $this->assetBase(),
             'api_base'         => $this->routeBase() . '/api',
             'music_url'        => $this->routeBase() . '/music',
+            'version'          => $this->version(),
             'default_station'  => Station::DEFAULT_CODE,
             'default_city'     => Station::DEFAULT_CITY,
             'default_province' => Station::DEFAULT_PROVINCE,
         ]);
     }
 
-    public function provinces(): \think\response\Json
+    public function provinces(): Json
     {
-        return json(Province::tree());
+        return json($this->weather->provinces());
     }
 
     public function weather(Request $request): \think\Response
@@ -101,41 +105,22 @@ class WeatherController
     private function respond(Request $request, bool $refreshEndpoint): \think\Response
     {
         $requested = trim((string) $request->param('stationid', ''));
-        $stationid = Station::normalize($requested);
-        $fallback  = $requested !== $stationid;
-
-        $expectedToken = (string) Config::get('weather.api.refresh_token', '');
-        $token         = (string) $request->param('token', '');
-        $authorized    = RefreshToken::matches($token, $expectedToken);
-
-        if ($refreshEndpoint && !$authorized) {
-            return json([
-                'code' => -1,
-                'msg'  => '刷新令牌无效或未配置',
-                'data' => null,
-            ], 403, ['X-Weather-Cache' => 'bypass']);
-        }
-
-        $cache = new WeatherCache(
-            'weather:station:',
-            (int) Config::get('weather.api.cache_ttl', 28800)
-        );
-
-        // 令牌正确时跳过缓存，直接回源并覆盖缓存
-        if (!$authorized) {
-            $cached = $cache->get($stationid);
-
-            if ($cached !== null) {
-                return $this->payload($cached, $stationid, $fallback, 'hit');
-            }
-        }
-
-        $endpoint = (string) Config::get('weather.api.endpoint', WeatherClient::DEFAULT_ENDPOINT);
-        $timeout  = (int) Config::get('weather.api.timeout', 8);
 
         try {
-            $result = (new WeatherClient($endpoint, $timeout))->query($requested);
+            $result = $this->weather->query(
+                $requested,
+                $refreshEndpoint,
+                (string) $request->param('token', '')
+            );
+        } catch (RefreshDenied $e) {
+            return json([
+                'code' => -1,
+                'msg'  => $e->getMessage(),
+                'data' => null,
+            ], 403, ['X-Weather-Cache' => 'bypass']);
         } catch (\Throwable $e) {
+            $fallback = $requested !== Station::normalize($requested);
+
             return json([
                 'code' => -1,
                 'msg'  => $e->getMessage(),
@@ -143,13 +128,11 @@ class WeatherController
             ], 502, ['X-Weather-Fallback' => $fallback ? '1' : '0']);
         }
 
-        $cache->set($result['stationid'], $result['body']);
-
         return $this->payload(
             $result['body'],
             $result['stationid'],
             $result['fallback'],
-            $authorized ? 'refresh' : 'miss'
+            $result['cache']
         );
     }
 
@@ -165,9 +148,10 @@ class WeatherController
 
     private function routeBase(): string
     {
-        $prefix = trim((string) Config::get('weather.route.prefix', 'weather'), '/');
+        $prefix  = trim((string) Config::get('weather.route.prefix', 'store'), '/');
+        $segment = trim((string) Config::get('weather.route.segment', 'think-store-weather'), '/');
 
-        return $prefix === '' ? '' : '/' . $prefix;
+        return ($prefix === '' ? '' : '/' . $prefix) . ($segment === '' ? '' : '/' . $segment);
     }
 
     private function assetBase(): string
@@ -182,6 +166,36 @@ class WeatherController
             return rtrim($raw, '/');
         }
 
-        return $this->routeBase() . '/' . trim($raw, '/');
+        $prefix = trim((string) Config::get('weather.route.prefix', 'store'), '/');
+
+        return ($prefix === '' ? '' : '/' . $prefix) . '/' . trim($raw, '/');
+    }
+
+    /**
+     * 包版本号，优先读取 Composer 运行时信息。
+     */
+    private function version(): string
+    {
+        if (class_exists(\Composer\InstalledVersions::class)) {
+            try {
+                $version = \Composer\InstalledVersions::getPrettyVersion('youvision/think-store-weather');
+
+                if (is_string($version) && $version !== '') {
+                    return $version;
+                }
+            } catch (\Throwable) {
+            }
+        }
+
+        $file = dirname(__DIR__, 2) . '/composer.json';
+
+        if (!is_file($file)) {
+            return 'dev';
+        }
+
+        $json    = json_decode((string) file_get_contents($file), true);
+        $version = is_array($json) ? (string) ($json['version'] ?? '') : '';
+
+        return $version !== '' ? $version : 'dev';
     }
 }

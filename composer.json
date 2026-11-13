@@ -39,18 +39,27 @@
         "think": {
             "services": [
                 "Youvision\\ThinkStoreWeather\\Service"
-            ]
+            ],
+            "config": {
+                "weather": "config/weather.php"
+            }
+        },
+        "store": {
+            "home": "/store/think-store-weather/index"
         }
     },
     "scripts": {
         "test": "phpunit",
+        "verify": "@php tests/verify.php",
         "analyse": "phpstan analyse --no-progress",
         "check": [
             "@test",
+            "@verify",
             "@analyse"
         ]
     },
     "config": {
+        "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {}
     },

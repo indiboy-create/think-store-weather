@@ -14,7 +14,6 @@ use think\Response;
  */
 class AssetController
 {
-    public const PREFIX = '/weather/assets';
 
     private const MIME = [
         'css'   => 'text/css; charset=utf-8',

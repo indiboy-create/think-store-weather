@@ -6,23 +6,18 @@ namespace Youvision\ThinkStoreWeather;
 
 use think\Service as BaseService;
 
+
 /**
  * 服务提供者。
  *
- * register() 只做配置合并，不产生 IO；boot() 才注册路由。
+ * register() 只做配置合并与容器绑定，不产生 IO；boot() 才注册路由。
  */
 class Service extends BaseService
 {
     public function register(): void
     {
-        /** @var array<string, mixed> $defaults */
-        $defaults = (array) include __DIR__ . '/../config/weather.php';
-
-        /** @var array<string, mixed> $current */
-        $current = (array) $this->app->config->get('weather', []);
-
-        // 项目侧配置优先，包内默认值只负责补齐缺失的键
-        $this->app->config->set(['weather' => array_replace_recursive($defaults, $current)]);
+        $this->mergeConfig();
+        $this->bindWeather();
 
         // 页面依赖 think-view 提供的 Think 驱动；宿主已有视图配置时保持原样
         if (!$this->app->config->has('view.type')) {
@@ -32,22 +27,46 @@ class Service extends BaseService
 
     public function boot(): void
     {
-        $this->loadRoutes();
+        if ($this->app->config->get('weather.route.enabled', true)) {
+            $this->loadRoutesFrom(dirname(__DIR__) . '/route/weather.php');
+        }
     }
 
     /**
-     * 加载包内路由定义；关闭 weather.route.enabled 时交给主项目自行注册。
+     * 包内默认配置只负责补齐缺失的键，项目侧配置优先。
      */
-    private function loadRoutes(): void
+    protected function mergeConfig(): void
     {
-        if (!$this->app->config->get('weather.route.enabled', true)) {
-            return;
-        }
+        /** @var array<string, mixed> $default */
+        $default = require dirname(__DIR__) . '/config/weather.php';
 
-        $route = __DIR__ . '/route/route.php';
+        /** @var array<string, mixed> $current */
+        $current = (array) $this->app->config->get('weather', []);
 
-        if (is_file($route)) {
-            include $route;
-        }
+        $this->app->config->set(array_replace_recursive($default, $current), 'weather');
+    }
+
+    /**
+     * 注册核心服务，支持 app('weather') 与 app(Weather::class) 两种取法。
+     */
+    protected function bindWeather(): void
+    {
+        $this->app->bind('weather', function (): Weather {
+            /** @var array<string, mixed> $config */
+            $config = (array) $this->app->config->get('weather', []);
+
+            /** @var array<string, mixed> $api */
+            $api = (array) ($config['api'] ?? []);
+
+            return new Weather(
+                endpoint: (string) ($api['endpoint'] ?? ''),
+                timeout: (int) ($api['timeout'] ?? 8),
+                cacheTtl: (int) ($api['cache_ttl'] ?? 28800),
+                refreshToken: (string) ($api['refresh_token'] ?? ''),
+                referer: (string) ($api['referer'] ?? '')
+            );
+        });
+
+        $this->app->bind(Weather::class, 'weather');
     }
 }
