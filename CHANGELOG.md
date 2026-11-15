@@ -23,4 +23,6 @@
 - 商店接入：`composer.json` 的 `extra.store.home` 声明发布包首页，供 think-store 读取
 - 非法站点自动回退默认城市郑州（`YVItN`），并通过 `X-Weather-Fallback` 标记
 - 视图来源可配置：`store_weather.view` 留空使用包内 `theme/view`，非空时改用主项目 `view/think-store-weather` 目录
+- 页面上下部分抽取到 `theme/view/common/layout.html`，导航改用 Layui `layui-nav`，页脚增加页面入口
+- 新增内嵌页面示例 `/store/think-store-weather/iframe` 与内嵌天气内容页 `/store/think-store-weather/iframe/weather`，iframe 样式与脚本统一放在 `theme/assets/iframe/`
 - `composer test` 独立校验脚本，覆盖配置、路由、资源与核心服务行为

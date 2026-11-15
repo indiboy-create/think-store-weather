@@ -5,6 +5,7 @@
 - **城市天气页面** —— 省市联动 + 实时天气 + 温度趋势 + 七天预报，响应式布局，Layui 2.13.9 本地化，默认河南郑州
 - **天气 JSON 接口** —— 代理远程天气接口，原样返回上游 JSON，默认缓存 8 小时，支持令牌强制刷新
 - **城市电台** —— 首屏城市选择卡内置播放器，播放包内 `zhengzhou.mp3`，支持进度拖动
+- **内嵌页面示例** —— 可内嵌页面列表 + iframe 预览，天气内容页只输出内容区，可直接嵌入后台系统
 
 ## 环境要求
 
@@ -32,6 +33,8 @@ php think vendor:publish
 | 方法 | 地址 | 说明 |
 |---|---|---|
 | GET | `/store/think-store-weather/index` | 天气页面，默认展示河南省 · 郑州（`YVItN`） |
+| GET | `/store/think-store-weather/iframe` | 内嵌页面示例：可内嵌页面列表、iframe 预览与新窗口打开 |
+| GET | `/store/think-store-weather/iframe/weather` | 内嵌天气内容页，只输出内容区，可直接用 iframe 嵌入 |
 | GET | `/store/think-store-weather/api/provinces` | 省市联动数据，树形数组，城市 `code` 即 `stationid` |
 | GET | `/store/think-store-weather/api/weather?stationid=YVItN` | 原样返回上游天气 JSON，默认读缓存 |
 | GET | `/store/think-store-weather/api/refresh?stationid=YVItN&token=xxx` | 强制回源并覆盖缓存 |
@@ -58,17 +61,45 @@ think-store 商店会读取该字段作为发布包的「访问」地址。
 
 ## 页面与静态资源
 
-- 模板默认位于包内 `theme/view/dashboard.html`，由包内 `View` 渲染器固定使用 think-view 的 `Think` 驱动渲染；当 `view` 配置填写非空值（如 `view/think-store-weather`）时，改为读取主项目 `view/think-store-weather/dashboard.html`，需要自行把模板复制过去。
+页面由包内 `View` 渲染器固定使用 think-view 的 `Think` 驱动渲染，模板默认位于包内 `theme/view`：
+
+| 模板 | 说明 |
+|---|---|
+| `common/layout.html` | 上下部分：站点导航（Layui `layui-nav`）、页脚、Layui 与布局脚本 |
+| `index.html` | 天气首页，复用 `common/layout.html` |
+| `iframe.html` | 内嵌页面示例：页面列表与 iframe 预览 |
+| `iframe/weather.html` | 天气内容页，只输出内容区，不含站点导航与页脚 |
+
+当 `view` 配置填写非空值（如 `view/think-store-weather`）时，改为读取主项目 `view/think-store-weather` 目录，需要自行把上述模板复制过去。
+
 - 静态资源由 `AssetController` 读取 `theme/assets` 后输出，路径经过 `realpath` 校验并拒绝 `..`，避免目录穿越。
+- 内嵌页面相关样式与脚本统一放在 `theme/assets/iframe/`，内容页只加载 `layui.css` 与 `iframe/css/weather.css`。
 - 资源响应带 `Cache-Control: public, max-age=86400`，字体、CSS、JS、图片等类型会返回对应的 `Content-Type`。
 - 模板内的接口地址、资源地址与音乐地址会跟随 `route.prefix`、`route.segment` 与 `assets` 自动变化。
 
 ```
 /store/think-store-weather/index
+/store/think-store-weather/iframe
+/store/think-store-weather/iframe/weather
 /store/think-store-weather/assets/css/site.css
-/store/think-store-weather/assets/js/app.js
+/store/think-store-weather/assets/iframe/css/iframe.css
+/store/think-store-weather/assets/iframe/js/iframe.js
 /store/think-store-weather/assets/layui/css/layui.css
 ```
+
+## 内嵌页面
+
+内嵌示例页 `/store/think-store-weather/iframe` 使用 Layui 数据表格维护可内嵌页面清单，并在当前页面加载 iframe 预览；清单由 `WeatherController::iframe()` 提供，新增页面后自动出现在列表中。
+
+天气内容页 `/store/think-store-weather/iframe/weather` 不包含站点导航与页脚，可直接嵌入其他系统：
+
+```html
+<iframe src="/store/think-store-weather/iframe/weather" style="width:100%;height:580px;border:0"></iframe>
+```
+
+> 若宿主站点设置了 `X-Frame-Options` 或 CSP 限制，iframe 预览可能显示空白，此时请直接在新窗口打开，或调整响应头。
+
+内容页数据来自 `api/provinces` 与 `api/weather`，与首页共用站点白名单与 8 小时缓存。
 
 ## 查询接口
 
@@ -194,10 +225,15 @@ think-store-weather/
 │  ├─ Support/                    # Province / Station / WeatherClient / WeatherCache / RefreshToken / AudioRange
 │  └─ data/                       # 省市站点树、站点白名单与本地音频
 ├─ theme/
-│  ├─ view/dashboard.html         # 天气页面模板
+│  ├─ view/
+│  │  ├─ common/layout.html       # 上下部分：导航、页脚与公共脚本
+│  │  ├─ index.html               # 天气首页
+│  │  ├─ iframe.html              # 内嵌页面示例
+│  │  └─ iframe/weather.html      # 天气内容页（只输出内容区）
 │  └─ assets/
-│     ├─ css/site.css             # 页面样式
-│     ├─ js/app.js                # 页面交互
+│     ├─ css/site.css             # 站点样式
+│     ├─ js/app.js                # 首页交互
+│     ├─ iframe/                  # 内嵌页面样式与脚本
 │     └─ layui/                   # 本地 Layui 2.13.9
 └─ tests/verify.php
 ```

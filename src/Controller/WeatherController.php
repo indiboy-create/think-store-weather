@@ -17,7 +17,9 @@ use Youvision\ThinkStoreWeather\Weather;
  * 天气查询页面与 JSON 接口。
  *
  * 路由由服务提供者统一注册，默认地址：
- * - GET /store/think-store-weather/index            页面（think-view 渲染）
+ * - GET /store/think-store-weather/index            天气首页（think-view 渲染）
+ * - GET /store/think-store-weather/iframe           内嵌页面示例（列表 + iframe 预览）
+ * - GET /store/think-store-weather/iframe/weather   内嵌天气内容页（只输出内容区）
  * - GET /store/think-store-weather/api/provinces    省市联动数据
  * - GET /store/think-store-weather/api/weather      天气 JSON（默认读缓存）
  * - GET /store/think-store-weather/api/refresh      强制刷新天气 JSON（需 token）
@@ -34,14 +36,39 @@ class WeatherController
 
     public function index(): \think\Response
     {
-        return response($this->view->render('dashboard', [
-            'asset'            => $this->assetBase(),
-            'api_base'         => $this->routeBase() . '/api',
-            'music_url'        => $this->routeBase() . '/music',
-            'version'          => $this->version(),
-            'default_station'  => Station::DEFAULT_CODE,
-            'default_city'     => Station::DEFAULT_CITY,
-            'default_province' => Station::DEFAULT_PROVINCE,
+        return response($this->view->render('index', $this->pageVars('index') + [
+            'page_title' => '城市天气 · think-store-weather',
+            'page_desc'  => '城市天气查询：省市联动、实时天气、温度趋势与七日预报，ThinkPHP 8 + Layui 本地化实现。',
+        ]));
+    }
+
+    public function iframe(): \think\Response
+    {
+        $embedPath = $this->embedPath();
+
+        $pages = [[
+            'name'        => '天气内容页',
+            'path'        => $embedPath,
+            'description' => '省市联动、实时天气与七天预报，只输出内容区，适合嵌入后台管理系统。',
+        ]];
+
+        return response($this->view->render('iframe', $this->pageVars('iframe') + [
+            'page_title' => '内嵌页面示例 · think-store-weather',
+            'page_desc'  => '汇总可被其他系统通过 iframe 调用的天气页面，支持列表预览与新窗口打开。',
+            'embed_path' => $embedPath,
+            'pages_json' => (string) json_encode($pages, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+        ]));
+    }
+
+    public function embed(): \think\Response
+    {
+        $embedPath = $this->embedPath();
+
+        return response($this->view->render('iframe/weather', $this->pageVars('iframe') + [
+            'page_title' => '天气内容页 · think-store-weather',
+            'page_desc'  => '供其他系统 iframe 内嵌的天气页面：省市联动、实时天气与七天预报。',
+            'embed_path' => $embedPath,
+            'embed_code' => '<iframe src="' . $embedPath . '" style="width:100%;height:580px;border:0"></iframe>',
         ]));
     }
 
@@ -100,6 +127,33 @@ class WeatherController
             'Accept-Ranges'  => 'bytes',
             'Cache-Control'  => 'public, max-age=86400',
         ]);
+    }
+
+    /**
+     * 页面公共变量：路由基址、资源基址、默认城市与版本。
+     *
+     * @return array<string, mixed>
+     */
+    private function pageVars(string $active): array
+    {
+        $base = $this->routeBase();
+
+        return [
+            'asset'            => $this->assetBase(),
+            'base'             => $base,
+            'api_base'         => $base . '/api',
+            'music_url'        => $base . '/music',
+            'version'          => $this->version(),
+            'active'           => $active,
+            'default_station'  => Station::DEFAULT_CODE,
+            'default_city'     => Station::DEFAULT_CITY,
+            'default_province' => Station::DEFAULT_PROVINCE,
+        ];
+    }
+
+    private function embedPath(): string
+    {
+        return $this->routeBase() . '/iframe/weather';
     }
 
     private function respond(Request $request, bool $refreshEndpoint): \think\Response

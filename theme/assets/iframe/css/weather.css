@@ -1,0 +1,167 @@
+/* 内嵌天气内容页：只输出内容区，沿用 layui 官方原版风格 */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #f2f2f2;
+}
+
+body.iframe-weather {
+  padding: 15px;
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  color: #333;
+  -webkit-font-smoothing: antialiased;
+}
+
+.iframe-weather .layui-card {
+  border-radius: 2px;
+  border: 1px solid #e6e6e6;
+  box-shadow: none;
+}
+
+.iframe-weather .layui-card-body {
+  padding: 15px;
+}
+
+.iframe-weather .layui-tab {
+  margin: 0;
+}
+
+.iframe-weather .layui-tab-title li {
+  padding: 0 14px;
+}
+
+.iframe-weather__toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 12px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.iframe-weather__toolbar .layui-form-label {
+  width: 48px;
+  padding: 9px 6px 9px 0;
+  text-align: right;
+}
+
+.iframe-weather__toolbar .layui-input-inline {
+  width: 130px;
+}
+
+.iframe-weather__toolbar .layui-input,
+.iframe-weather__toolbar .layui-select {
+  height: 32px;
+  line-height: 32px;
+}
+
+.iframe-weather__hint {
+  margin-left: auto;
+  font-size: 12px;
+  color: #999;
+}
+
+.iframe-weather__hint code,
+.iframe-weather__code {
+  font-family: 'Cascadia Code', Consolas, Monaco, monospace;
+  font-size: 12px;
+  padding: 1px 6px;
+  border-radius: 2px;
+  color: #16baaa;
+  background: #f2fbfa;
+}
+
+.iframe-weather__now {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 10px 4px 18px;
+}
+
+.iframe-weather__temp {
+  display: flex;
+  align-items: flex-start;
+  color: #16baaa;
+  line-height: 0.95;
+}
+
+.iframe-weather__temp strong {
+  font-size: 64px;
+  font-weight: 700;
+}
+
+.iframe-weather__temp span {
+  margin-top: 6px;
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.iframe-weather__meta h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+}
+
+.iframe-weather__meta p {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: #666;
+}
+
+.iframe-weather__time {
+  color: #999 !important;
+  font-size: 12px !important;
+}
+
+.iframe-weather__icon {
+  margin-left: auto;
+  font-size: 46px;
+  line-height: 1;
+}
+
+.iframe-weather__table {
+  margin-bottom: 0;
+}
+
+.iframe-weather__table td {
+  font-size: 13px;
+}
+
+.iframe-weather__table td:first-child {
+  color: #999;
+}
+
+.iframe-weather__table code {
+  font-family: 'Cascadia Code', Consolas, Monaco, monospace;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+@media (max-width: 640px) {
+  body.iframe-weather {
+    padding: 10px;
+  }
+
+  .iframe-weather__toolbar .layui-input-inline {
+    width: 100px;
+  }
+
+  .iframe-weather__hint {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .iframe-weather__temp strong {
+    font-size: 52px;
+  }
+
+  .iframe-weather__icon {
+    display: none;
+  }
+}

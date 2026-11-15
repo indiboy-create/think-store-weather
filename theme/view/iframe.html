@@ -1,0 +1,69 @@
+{extend name="common/layout" /}
+
+{block name="style"}
+<link rel="stylesheet" href="{$asset}/iframe/css/iframe.css">
+{/block}
+
+{block name="content"}
+<main id="wx-top">
+  <section class="wx-hero wx-hero--compact">
+    <div class="layui-container wx-hero-compact">
+      <span class="wx-badge"><i class="layui-icon layui-icon-template-1"></i> iframe · 内嵌页面</span>
+      <h1 class="wx-compact-title">内嵌<em>天气内容页</em>示例</h1>
+      <p class="wx-compact-desc">
+        天气内容页只输出内容区，不包含站点导航与页脚，适合通过 iframe 嵌入其他系统；
+        页面清单集中在控制器维护，新增内嵌页面后自动出现在列表中。
+      </p>
+      <p class="wx-compact-actions">
+        <a class="wx-btn wx-btn-primary" href="{$embed_path}" target="_blank" rel="noopener">
+          <i class="layui-icon layui-icon-log"></i> 新窗口打开天气内容页
+        </a>
+        <a class="wx-btn wx-btn-ghost" href="{$base}/index">返回天气首页</a>
+      </p>
+    </div>
+  </section>
+
+  <div class="layui-container wx-iframe-main">
+    <section class="wx-section">
+      <div class="wx-section-head">
+        <div>
+          <span class="wx-eyebrow">01 · Pages</span>
+          <h2>可内嵌页面列表</h2>
+          <p>点击「预览」在当前页面加载对应 iframe，或在新窗口单独打开。</p>
+        </div>
+      </div>
+      <div class="layui-card wx-iframe-card">
+        <div class="layui-card-body wx-iframe-table-wrap">
+          <table id="iframe-table" lay-filter="iframe-table"></table>
+        </div>
+      </div>
+    </section>
+
+    <section class="wx-section">
+      <div class="wx-section-head">
+        <div>
+          <span class="wx-eyebrow">02 · Preview</span>
+          <h2>iframe 预览</h2>
+          <p>预览区宽度跟随容器变化，用于验证内嵌页面在窄屏下的表现。</p>
+        </div>
+      </div>
+      <div class="wx-iframe-preview">
+        <div class="wx-iframe-preview-head">
+          <span>当前页面：<code id="iframe-current">{$embed_path}</code></span>
+          <a class="wx-iframe-open" id="iframe-open" href="{$embed_path}" target="_blank" rel="noopener">新窗口打开</a>
+        </div>
+        <iframe class="wx-iframe-frame" id="iframe-preview" src="{$embed_path}" title="内嵌页面预览" loading="lazy"></iframe>
+      </div>
+      <p class="wx-iframe-note">
+        <i class="layui-icon layui-icon-tips"></i>
+        若宿主站点设置了 X-Frame-Options 或 CSP 限制，预览区可能显示空白，此时可直接在新窗口打开。
+      </p>
+    </section>
+  </div>
+</main>
+{/block}
+
+{block name="script"}
+<script type="application/json" id="iframe-pages">{$pages_json|raw}</script>
+<script src="{$asset}/iframe/js/iframe.js"></script>
+{/block}

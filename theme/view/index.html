@@ -1,33 +1,6 @@
-<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>城市天气 · think-store-weather</title>
-  <meta name="description" content="城市天气查询，实时天气、温度趋势与七日预报。ThinkPHP 8 + Layui 本地化实现。">
-  <link rel="stylesheet" href="{$asset}/layui/css/layui.css">
-  <link rel="stylesheet" href="{$asset}/css/site.css">
-</head>
-<body>
-<header class="wx-header">
-  <div class="wx-container wx-header-inner">
-    <a class="wx-brand" href="#wx-top">
-      <span class="wx-brand-mark"><i class="layui-icon layui-icon-light"></i></span>
-      <span>Weather<small>THINK STORE WEATHER</small></span>
-    </a>
-    <nav class="wx-nav" id="wx-nav">
-      <a class="is-active" href="#wx-now">实时</a>
-      <a href="#wx-trend">趋势</a>
-      <a href="#wx-forecast">预报</a>
-      <a href="#wx-api">接口</a>
-    </nav>
-    <span class="wx-source"><i class="layui-icon layui-icon-fire"></i> 实时数据</span>
-    <button type="button" class="wx-nav-toggle" id="wx-nav-toggle" aria-label="打开导航" aria-expanded="false" aria-controls="wx-nav">
-      <i class="layui-icon layui-icon-spread-left"></i>
-    </button>
-  </div>
-</header>
+{extend name="common/layout" /}
 
+{block name="content"}
 <main id="wx-top">
   <section class="wx-hero">
     <div class="wx-container wx-hero-grid">
@@ -209,8 +182,8 @@
           <p>令牌正确时跳过 8 小时缓存，回源并覆盖缓存。</p>
         </article>
         <article class="wx-api-card">
-          <div class="wx-api-head"><span class="wx-method">GET</span><code>{$music_url}</code></div>
-          <p>页面背景音乐，支持 HTTP Range，可直接用于 <code>audio</code> 播放与拖动进度。</p>
+          <div class="wx-api-head"><span class="wx-method">GET</span><code>{$base}/iframe/weather</code></div>
+          <p>内嵌天气内容页，只输出内容区，不含站点导航与页脚，可直接用于 <code>iframe</code> 嵌入。</p>
         </article>
       </div>
 
@@ -228,8 +201,8 @@
           <p>youvision/think-store-weather 以 Composer 包形式发布，可作为 think-store 发布包接入商店；路由、缓存与页面都可按项目需要开启或替换。</p>
         </div>
         <div class="wx-cta-actions">
-          <a class="wx-btn wx-btn-primary" href="https://github.com/indiboy-create/think-store-weather" target="_blank" rel="noopener">
-            <i class="layui-icon layui-icon-log"></i> 访问 GitHub
+          <a class="wx-btn wx-btn-primary" href="{$base}/iframe">
+            <i class="layui-icon layui-icon-template-1"></i> 查看内嵌示例
           </a>
           <a class="wx-btn wx-btn-ghost" href="#wx-api">查看接口</a>
         </div>
@@ -237,56 +210,9 @@
     </section>
   </div>
 </main>
+{/block}
 
-<footer class="wx-footer">
-  <div class="wx-container">
-    <div class="wx-footer-grid">
-      <div class="wx-footer-brand-col">
-        <a class="wx-brand wx-footer-brand" href="#wx-top">
-          <span class="wx-brand-mark"><i class="layui-icon layui-icon-light"></i></span>
-          <span>Weather<small>THINK STORE WEATHER</small></span>
-        </a>
-        <p class="wx-footer-desc">
-          youvision/think-store-weather：面向 ThinkPHP 8 的天气查询组件，可作为 think-store 发布包接入商店，提供城市联动、实时天气接口与响应式页面。
-        </p>
-      </div>
-      <div>
-        <h4>能力</h4>
-        <div class="wx-footer-links">
-          <a href="#wx-now">实时天气</a>
-          <a href="#wx-trend">温度趋势</a>
-          <a href="#wx-forecast">七日预报</a>
-          <a href="#wx-api">接口说明</a>
-        </div>
-      </div>
-      <div>
-        <h4>接口</h4>
-        <div class="wx-footer-links">
-          <a href="{$api_base}/provinces">省市联动</a>
-          <a href="{$api_base}/weather?stationid=YVItN">天气 JSON</a>
-          <a href="#wx-start">强制刷新</a>
-          <a href="{$music_url}">城市电台</a>
-        </div>
-      </div>
-      <div>
-        <h4>资源</h4>
-        <div class="wx-footer-links">
-          <a href="https://github.com/indiboy-create/think-store-weather" target="_blank" rel="noopener">GitHub 仓库</a>
-          <a href="https://github.com/indiboy-create/think-store-weather#readme" target="_blank" rel="noopener">使用文档</a>
-          <a href="https://layui.dev/" target="_blank" rel="noopener">Layui 文档</a>
-          <a href="https://www.thinkphp.cn/" target="_blank" rel="noopener">ThinkPHP 官网</a>
-        </div>
-      </div>
-    </div>
-    <div class="wx-footer-bottom">
-      <span>© 2026 youvision/think-store-weather · v{$version}</span>
-      <span>Built with ThinkPHP 8 · Layui 2.13.9</span>
-    </div>
-  </div>
-</footer>
-
-
-
+{block name="script"}
 <script>
   window.WEATHER_CONFIG = {
     apiBase: '{$api_base}',
@@ -295,7 +221,5 @@
     defaultCity: '{$default_city}'
   };
 </script>
-<script src="{$asset}/layui/layui.js"></script>
 <script src="{$asset}/js/app.js"></script>
-</body>
-</html>
+{/block}

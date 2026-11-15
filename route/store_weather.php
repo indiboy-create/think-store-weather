@@ -26,6 +26,8 @@ $register = static function () use ($segment): void {
     $base = $segment === '' ? '' : $segment . '/';
 
     Route::get($base . 'index', [WeatherController::class, 'index'])->name('weather.index')->completeMatch();
+    Route::get($base . 'iframe', [WeatherController::class, 'iframe'])->name('weather.iframe')->completeMatch();
+    Route::get($base . 'iframe/weather', [WeatherController::class, 'embed'])->name('weather.embed')->completeMatch();
     Route::get($base . 'api/provinces', [WeatherController::class, 'provinces'])->name('weather.provinces')->completeMatch();
     Route::get($base . 'api/weather', [WeatherController::class, 'weather'])->name('weather.api')->completeMatch();
     Route::get($base . 'api/refresh', [WeatherController::class, 'refresh'])->name('weather.refresh')->completeMatch();

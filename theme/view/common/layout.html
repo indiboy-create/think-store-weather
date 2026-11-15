@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{$page_title}</title>
+  <meta name="description" content="{$page_desc}">
+  <link rel="stylesheet" href="{$asset}/layui/css/layui.css">
+  <link rel="stylesheet" href="{$asset}/css/site.css">
+  {block name="style"}{/block}
+</head>
+<body class="wx-page">
+<header class="wx-header">
+  <div class="layui-container wx-header-inner">
+    <a class="wx-brand" href="{$base}/index">
+      <span class="wx-brand-mark"><i class="layui-icon layui-icon-light"></i></span>
+      <span>Weather<small>THINK STORE WEATHER</small></span>
+    </a>
+    <ul class="layui-nav wx-nav" lay-filter="wx-nav">
+      <li class="layui-nav-item{if $active == 'index'} layui-this{/if}"><a href="{$base}/index">首页</a></li>
+      <li class="layui-nav-item{if $active == 'iframe'} layui-this{/if}"><a href="{$base}/iframe">内嵌示例</a></li>
+    </ul>
+    <a class="wx-github" href="https://github.com/indiboy-create/think-store-weather" target="_blank" rel="noopener">
+      <i class="layui-icon layui-icon-github"></i><span>GitHub</span>
+    </a>
+  </div>
+</header>
+
+{block name="content"}{/block}
+
+<footer class="wx-footer">
+  <div class="layui-container">
+    <div class="wx-footer-grid">
+      <div class="wx-footer-brand-col">
+        <a class="wx-brand wx-footer-brand" href="{$base}/index">
+          <span class="wx-brand-mark"><i class="layui-icon layui-icon-light"></i></span>
+          <span>Weather<small>THINK STORE WEATHER</small></span>
+        </a>
+        <p class="wx-footer-desc">
+          youvision/think-store-weather：面向 ThinkPHP 8 的天气查询组件，可作为 think-store 发布包接入商店，提供城市联动、实时天气接口、响应式页面与内嵌页面示例。
+        </p>
+      </div>
+      <div class="wx-footer-col">
+        <h4>能力</h4>
+        <div class="wx-footer-links">
+          <a href="{$base}/index#wx-now">实时天气</a>
+          <a href="{$base}/index#wx-trend">温度趋势</a>
+          <a href="{$base}/index#wx-forecast">七日预报</a>
+          <a href="{$base}/index#wx-api">接口说明</a>
+        </div>
+      </div>
+      <div class="wx-footer-col">
+        <h4>页面</h4>
+        <div class="wx-footer-links">
+          <a href="{$base}/index">天气首页</a>
+          <a href="{$base}/iframe">内嵌示例</a>
+          <a href="{$base}/iframe/weather">天气内容页</a>
+          <a href="{$music_url}">城市电台</a>
+        </div>
+      </div>
+      <div class="wx-footer-col">
+        <h4>资源</h4>
+        <div class="wx-footer-links">
+          <a href="https://github.com/indiboy-create/think-store-weather" target="_blank" rel="noopener">GitHub 仓库</a>
+          <a href="https://github.com/indiboy-create/think-store-weather#readme" target="_blank" rel="noopener">使用文档</a>
+          <a href="https://layui.dev/" target="_blank" rel="noopener">Layui 文档</a>
+          <a href="https://www.thinkphp.cn/" target="_blank" rel="noopener">ThinkPHP 官网</a>
+        </div>
+      </div>
+    </div>
+    <div class="wx-footer-bottom">
+      <span>© 2026 youvision/think-store-weather · v{$version}</span>
+      <span>Built with ThinkPHP 8 · Layui 2.13.9</span>
+    </div>
+  </div>
+</footer>
+
+<script src="{$asset}/layui/layui.js"></script>
+<script>layui.use('element', function () {});</script>
+{block name="script"}{/block}
+</body>
+</html>

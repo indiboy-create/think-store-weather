@@ -92,52 +92,44 @@ code { font-family: var(--wx-mono); font-size: 12.5px; }
   margin-top: 3px;
 }
 
-.wx-nav {
+.wx-nav.layui-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  float: none;
+  height: auto;
   margin-left: auto;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
-.wx-nav a {
-  padding: 8px 14px;
+.wx-nav .layui-nav-item {
+  float: none;
+  line-height: 1;
+}
+
+.wx-nav .layui-nav-item > a {
+  padding: 9px 14px;
   border-radius: 9px;
   font-size: 14px;
   color: var(--wx-ink-2);
   transition: color 0.2s, background 0.2s;
 }
 
-.wx-nav a:hover,
-.wx-nav a.is-active {
+.wx-nav .layui-nav-item > a:hover,
+.wx-nav .layui-nav-item.layui-this > a {
   color: var(--wx-brand-deep);
   background: var(--wx-brand-soft);
 }
 
-.wx-nav a.is-active { font-weight: 600; }
+.wx-nav .layui-nav-item.layui-this > a { font-weight: 600; }
 
-.wx-nav-toggle {
+.wx-nav .layui-nav-bar,
+.wx-nav .layui-nav-more {
   display: none;
-  width: 38px;
-  height: 38px;
-  padding: 0;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--wx-line);
-  border-radius: 10px;
-  background: #fff;
-  color: var(--wx-ink-2);
-  font-size: 17px;
-  cursor: pointer;
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
 
-.wx-nav-toggle:hover {
-  border-color: var(--wx-brand);
-  color: var(--wx-brand-deep);
-  background: var(--wx-brand-soft);
-}
-
-.wx-source {
+.wx-github {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -149,9 +141,16 @@ code { font-family: var(--wx-mono); font-size: 12.5px; }
   color: var(--wx-ink-2);
   background: #fff;
   white-space: nowrap;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
 
-.wx-source .layui-icon { color: var(--wx-brand); }
+.wx-github .layui-icon { font-size: 15px; }
+
+.wx-github:hover {
+  border-color: var(--wx-brand);
+  color: var(--wx-brand-deep);
+  background: var(--wx-brand-soft);
+}
 
 /* Hero */
 .wx-hero {
@@ -1031,28 +1030,9 @@ code { font-family: var(--wx-mono); font-size: 12.5px; }
 }
 
 @media (max-width: 820px) {
-  .wx-header-inner { gap: 14px; }
-  .wx-nav-toggle { display: flex; margin-left: auto; }
-  .wx-source { display: none; }
-  .wx-nav {
-    display: none;
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 16px;
-    right: 16px;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 2px;
-    padding: 10px;
-    margin-left: 0;
-    background: #fff;
-    border: 1px solid var(--wx-line);
-    border-radius: 14px;
-    box-shadow: 0 18px 42px rgba(16, 42, 42, 0.16);
-    z-index: 95;
-  }
-  .wx-nav.is-open { display: flex; }
-  .wx-nav a { padding: 11px 14px; }
+  .wx-header-inner { gap: 12px; }
+  .wx-github { padding: 0 10px; }
+  .wx-github span { display: none; }
   .wx-hero-city { font-size: 34px; }
   .wx-hero-temp span { font-size: 72px; }
   .wx-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1083,7 +1063,7 @@ code { font-family: var(--wx-mono); font-size: 12.5px; }
     padding-bottom: 8px;
   }
   .wx-day { scroll-snap-align: start; }
-  .wx-source { display: none; }
+
   .wx-section-tip { display: none; }
   .wx-player-state { display: none; }
 }
