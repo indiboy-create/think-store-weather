@@ -203,7 +203,13 @@ think-store-weather/
 ## 验证
 
 ```bash
-composer verify      # 结构与配置校验脚本
+composer test
+```
+
+或直接运行：
+
+```bash
+php tests/verify.php
 ```
 
 `tests/verify.php` 会检查 `composer.json` 的依赖、服务注册、配置发布与商店首页声明，默认配置、路由定义、控制器与资源解析，并实际调用 `Weather` 服务验证白名单回退、强制刷新令牌与资源目录穿越防护。

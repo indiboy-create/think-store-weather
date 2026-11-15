@@ -22,4 +22,4 @@
 - 配置发布：`composer.json` 的 `extra.think.config.weather` 声明默认配置
 - 商店接入：`composer.json` 的 `extra.store.home` 声明发布包首页，供 think-store 读取
 - 非法站点自动回退默认城市郑州（`YVItN`），并通过 `X-Weather-Fallback` 标记
-- `composer verify` 独立校验脚本，覆盖配置、路由、资源与核心服务行为
+- `composer test` 独立校验脚本，覆盖配置、路由、资源与核心服务行为

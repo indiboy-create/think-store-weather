@@ -41,7 +41,7 @@
         }
     },
     "scripts": {
-        "verify": "@php tests/verify.php"
+        "test": "@php tests/verify.php"
     },
     "config": {
         "preferred-install": "dist",

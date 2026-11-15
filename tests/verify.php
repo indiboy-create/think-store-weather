@@ -11,11 +11,19 @@ $check = static function (bool $ok, string $message) use (&$failures): void {
     }
 };
 
-$autoload = $packageRoot . '/vendor/autoload.php';
+spl_autoload_register(static function (string $class) use ($packageRoot): void {
+    $prefix = 'Youvision\\ThinkStoreWeather\\';
 
-if (is_file($autoload)) {
-    require $autoload;
-}
+    if (!str_starts_with($class, $prefix)) {
+        return;
+    }
+
+    $file = $packageRoot . '/src/' . str_replace('\\', '/', substr($class, strlen($prefix))) . '.php';
+
+    if (is_file($file)) {
+        require_once $file;
+    }
+});
 
 $composer = json_decode((string) file_get_contents($packageRoot . '/composer.json'), true);
 
@@ -47,8 +55,8 @@ $check(
     'composer.json 应声明商店首页路由'
 );
 $check(
-    ($composer['scripts']['verify'] ?? '') === '@php tests/verify.php',
-    'composer.json 应提供 verify 脚本'
+    ($composer['scripts']['test'] ?? '') === '@php tests/verify.php',
+    'composer.json 应提供 test 脚本'
 );
 
 $configFile = $packageRoot . '/config/weather.php';
@@ -191,7 +199,7 @@ $check(str_contains($readme, '/store/think-store-weather/index'), 'README 应说
 $check(str_contains($readme, '/store/think-store-weather/assets/<path>'), 'README 应说明静态资源地址');
 $check(str_contains($readme, "app('weather')"), 'README 应说明容器调用方式');
 $check(str_contains($readme, 'extra.store.home'), 'README 应说明商店首页声明');
-$check(str_contains($readme, 'composer verify'), 'README 应说明 verify 脚本');
+$check(str_contains($readme, 'composer test'), 'README 应说明 test 脚本');
 
 if (!class_exists(\Youvision\ThinkStoreWeather\Weather::class)) {
     foreach ($failures as $failure) {
