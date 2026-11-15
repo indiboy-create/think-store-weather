@@ -15,6 +15,7 @@
       data-city="{$default_city}">
 <div class="wx-embed">
   <section class="wx-embed-hero">
+    <div class="wx-embed-hero__bg"></div>
     <div class="layui-row layui-col-space16 wx-embed-hero__inner">
       <div class="layui-col-md7 layui-col-xs12">
         <div class="wx-embed-now">
@@ -84,6 +85,26 @@
         </div>
       </div>
     </div>
+  </section>
+
+  <section class="wx-embed-player" id="iframe-player">
+    <button type="button" class="wx-embed-player__btn" id="iframe-play" aria-label="播放城市电台">
+      <i class="layui-icon layui-icon-play"></i>
+    </button>
+    <div class="wx-embed-player__main">
+      <div class="wx-embed-player__row">
+        <span class="wx-embed-player__name">
+          <i class="layui-icon layui-icon-music"></i>
+          <span id="iframe-player-city">{$default_city}</span> · 城市电台
+        </span>
+        <span class="wx-embed-player__time" id="iframe-player-time">00:00 / 00:00</span>
+      </div>
+      <div class="wx-embed-player__progress" id="iframe-player-progress" title="点击跳转">
+        <i class="wx-embed-player__fill" id="iframe-player-fill"></i>
+      </div>
+    </div>
+    <span class="wx-embed-player__state" id="iframe-player-state">MP3</span>
+    <audio id="iframe-player-audio" preload="metadata" src="{$music_url}"></audio>
   </section>
 
   <section class="wx-embed-section">

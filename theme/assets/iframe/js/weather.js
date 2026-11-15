@@ -247,6 +247,12 @@
     el('iframe-time').textContent = real.publish_time || '—';
     el('iframe-station').textContent = state.stationid;
 
+    var playerCity = el('iframe-player-city');
+
+    if (playerCity) {
+      playerCity.textContent = cityName;
+    }
+
     renderForecast(data);
   }
 
@@ -322,6 +328,107 @@
     }).join('');
   }
 
+  function initPlayer() {
+    var audio = el('iframe-player-audio');
+    var button = el('iframe-play');
+    var fill = el('iframe-player-fill');
+    var progress = el('iframe-player-progress');
+    var timeEl = el('iframe-player-time');
+    var stateEl = el('iframe-player-state');
+
+    if (!audio || !button) {
+      return;
+    }
+
+    var icon = button.querySelector('i');
+
+    function format(seconds) {
+      if (!isFinite(seconds) || seconds < 0) {
+        seconds = 0;
+      }
+
+      var minutes = Math.floor(seconds / 60);
+      var rest = Math.floor(seconds % 60);
+
+      return (minutes < 10 ? '0' + minutes : minutes) + ':' + (rest < 10 ? '0' + rest : rest);
+    }
+
+    function sync() {
+      var duration = audio.duration || 0;
+      var percent = duration > 0 ? (audio.currentTime / duration) * 100 : 0;
+
+      if (fill) {
+        fill.style.width = percent + '%';
+      }
+
+      if (timeEl) {
+        timeEl.textContent = format(audio.currentTime) + ' / ' + format(duration);
+      }
+    }
+
+    function setState(playing) {
+      button.classList.toggle('is-playing', playing);
+
+      if (icon) {
+        icon.className = 'layui-icon ' + (playing ? 'layui-icon-pause' : 'layui-icon-play');
+      }
+
+      if (stateEl) {
+        stateEl.textContent = playing ? 'PLAYING' : 'MP3';
+      }
+    }
+
+    button.addEventListener('click', function () {
+      if (audio.paused) {
+        var result = audio.play();
+
+        if (result && typeof result.catch === 'function') {
+          result.catch(function () {
+            notify('音频播放失败，请检查资源地址');
+          });
+        }
+      } else {
+        audio.pause();
+      }
+    });
+
+    audio.addEventListener('play', function () {
+      setState(true);
+    });
+
+    audio.addEventListener('pause', function () {
+      setState(false);
+    });
+
+    audio.addEventListener('ended', function () {
+      setState(false);
+    });
+
+    audio.addEventListener('timeupdate', sync);
+    audio.addEventListener('loadedmetadata', sync);
+
+    if (progress) {
+      progress.addEventListener('click', function (event) {
+        if (!audio.duration) {
+          return;
+        }
+
+        var rect = progress.getBoundingClientRect();
+
+        if (rect.width === 0) {
+          return;
+        }
+
+        audio.currentTime = Math.max(
+          0,
+          Math.min(audio.duration, ((event.clientX - rect.left) / rect.width) * audio.duration)
+        );
+      });
+    }
+
+    sync();
+  }
+
   function bindEvents() {
     var provinceEl = document.querySelector('select[name="province"]');
     var cityEl = document.querySelector('select[name="city"]');
@@ -380,6 +487,7 @@
     state.layer = layer;
 
     bindEvents();
+    initPlayer();
 
     loadProvinces()
       .then(function () {
