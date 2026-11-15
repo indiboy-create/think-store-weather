@@ -253,7 +253,93 @@
       playerCity.textContent = cityName;
     }
 
+    renderTrend(data.tempchart);
     renderForecast(data);
+  }
+
+  function renderTrend(chart) {
+    var box = el('iframe-trend');
+
+    if (!box) {
+      return;
+    }
+
+    var items = [];
+
+    (Array.isArray(chart) ? chart : []).forEach(function (row) {
+      var max = Number(row.max_temp);
+      var min = Number(row.min_temp);
+      var date = String(row.time || '');
+
+      if (date && isFinite(max) && isFinite(min) && max < 9999 && min < 9999) {
+        items.push({ label: date.slice(5), max: max, min: min });
+      }
+    });
+
+    if (items.length < 2) {
+      box.innerHTML = '<div class="wx-embed-trend__empty">暂无趋势数据</div>';
+      return;
+    }
+
+    var w = 760;
+    var h = 240;
+    var pad = { l: 42, r: 26, t: 36, b: 40 };
+    var innerW = w - pad.l - pad.r;
+    var innerH = h - pad.t - pad.b;
+    var hi = Math.max.apply(null, items.map(function (d) { return d.max; }));
+    var lo = Math.min.apply(null, items.map(function (d) { return d.min; }));
+    var span = Math.max(1, hi - lo);
+    var step = innerW / (items.length - 1);
+
+    function px(index) {
+      return pad.l + step * index;
+    }
+
+    function py(value) {
+      return pad.t + innerH * (1 - (value - lo) / span);
+    }
+
+    var hiPoints = items.map(function (d, i) { return px(i) + ',' + py(d.max); }).join(' ');
+    var loPoints = items.map(function (d, i) { return px(i) + ',' + py(d.min); }).join(' ');
+    var area = hiPoints + ' ' + items.map(function (d, i) { return i; }).reverse().map(function (i) {
+      return px(i) + ',' + py(items[i].min);
+    }).join(' ');
+
+    var grid = [0, 0.5, 1].map(function (ratio) {
+      var y = pad.t + innerH * ratio;
+      var value = Math.round(hi - span * ratio);
+
+      return '<line x1="' + pad.l + '" y1="' + y + '" x2="' + (w - pad.r) + '" y2="' + y + '" stroke="#eef4f3" stroke-width="1"/>'
+        + '<text x="' + (pad.l - 10) + '" y="' + (y + 3) + '" text-anchor="end" font-size="10" fill="#9aadaa">' + value + '°</text>';
+    }).join('');
+
+    var dots = items.map(function (d, i) {
+      return '<circle cx="' + px(i) + '" cy="' + py(d.max) + '" r="3.6" fill="#16baaa"/>'
+        + '<circle cx="' + px(i) + '" cy="' + py(d.min) + '" r="3.6" fill="#ffd76a"/>';
+    }).join('');
+
+    var labels = items.map(function (d, i) {
+      return '<text x="' + px(i) + '" y="' + (py(d.max) - 10) + '" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0f9d92">' + Math.round(d.max) + '°</text>'
+        + '<text x="' + px(i) + '" y="' + (py(d.min) + 17) + '" text-anchor="middle" font-size="10.5" fill="#d9a521">' + Math.round(d.min) + '°</text>';
+    }).join('');
+
+    var dates = items.map(function (d, i) {
+      return '<text x="' + px(i) + '" y="' + (h - 12) + '" text-anchor="middle" font-size="10" fill="#8fa5a2">' + escapeHtml(d.label) + '</text>';
+    }).join('');
+
+    box.innerHTML = '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="未来气温趋势">'
+      + '<defs><linearGradient id="wxEmbedTrendGrad" x1="0" y1="0" x2="0" y2="1">'
+      + '<stop offset="0%" stop-color="#16baaa" stop-opacity="0.2"/>'
+      + '<stop offset="100%" stop-color="#16baaa" stop-opacity="0"/>'
+      + '</linearGradient></defs>'
+      + grid
+      + '<polygon points="' + area + '" fill="url(#wxEmbedTrendGrad)"/>'
+      + '<polyline points="' + hiPoints + '" fill="none" stroke="#16baaa" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'
+      + '<polyline points="' + loPoints + '" fill="none" stroke="#ffd76a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
+      + dots
+      + labels
+      + dates
+      + '</svg>';
   }
 
   function forecastRows(data) {
@@ -425,6 +511,22 @@
         );
       });
     }
+
+    audio.loop = true;
+
+    window.setTimeout(function () {
+      if (!audio.paused) {
+        return;
+      }
+
+      var result = audio.play();
+
+      if (result && typeof result.catch === 'function') {
+        result.catch(function () {
+          // 浏览器阻止自动播放时保持静默，等待用户点击
+        });
+      }
+    }, 600);
 
     sync();
   }

@@ -82,29 +82,28 @@
             <i class="layui-icon layui-icon-refresh"></i> 刷新天气
           </button>
           <p class="wx-embed-picker__hint">更新于 <span id="iframe-time">--</span></p>
+          <div class="wx-embed-player" id="iframe-player">
+            <button type="button" class="wx-embed-player__btn" id="iframe-play" aria-label="播放城市电台">
+              <i class="layui-icon layui-icon-play"></i>
+            </button>
+            <div class="wx-embed-player__main">
+              <div class="wx-embed-player__row">
+                <span class="wx-embed-player__name">
+                  <i class="layui-icon layui-icon-music"></i>
+                  <span id="iframe-player-city">{$default_city}</span> · 城市电台
+                </span>
+                <span class="wx-embed-player__time" id="iframe-player-time">00:00 / 00:00</span>
+              </div>
+              <div class="wx-embed-player__progress" id="iframe-player-progress" title="点击跳转">
+                <i class="wx-embed-player__fill" id="iframe-player-fill"></i>
+              </div>
+            </div>
+            <span class="wx-embed-player__state" id="iframe-player-state">MP3</span>
+            <audio id="iframe-player-audio" preload="metadata" src="{$music_url}"></audio>
+          </div>
         </div>
       </div>
     </div>
-  </section>
-
-  <section class="wx-embed-player" id="iframe-player">
-    <button type="button" class="wx-embed-player__btn" id="iframe-play" aria-label="播放城市电台">
-      <i class="layui-icon layui-icon-play"></i>
-    </button>
-    <div class="wx-embed-player__main">
-      <div class="wx-embed-player__row">
-        <span class="wx-embed-player__name">
-          <i class="layui-icon layui-icon-music"></i>
-          <span id="iframe-player-city">{$default_city}</span> · 城市电台
-        </span>
-        <span class="wx-embed-player__time" id="iframe-player-time">00:00 / 00:00</span>
-      </div>
-      <div class="wx-embed-player__progress" id="iframe-player-progress" title="点击跳转">
-        <i class="wx-embed-player__fill" id="iframe-player-fill"></i>
-      </div>
-    </div>
-    <span class="wx-embed-player__state" id="iframe-player-state">MP3</span>
-    <audio id="iframe-player-audio" preload="metadata" src="{$music_url}"></audio>
   </section>
 
   <section class="wx-embed-section">
@@ -117,6 +116,19 @@
     </div>
     <div class="wx-embed-days" id="iframe-forecast">
       <div class="wx-embed-day is-empty">正在获取预报…</div>
+    </div>
+  </section>
+
+  <section class="wx-embed-section">
+    <div class="wx-embed-section__head">
+      <div>
+        <span class="wx-embed-eyebrow">Trend</span>
+        <h2>温度趋势</h2>
+      </div>
+      <span class="wx-embed-section__tip">最高 / 最低气温</span>
+    </div>
+    <div class="wx-embed-trend" id="iframe-trend">
+      <div class="wx-embed-trend__empty">正在获取趋势数据…</div>
     </div>
   </section>
 
