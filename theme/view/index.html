@@ -3,8 +3,9 @@
 {block name="content"}
 <main id="wx-top">
   <section class="wx-hero">
-    <div class="layui-container wx-hero-grid">
-      <div class="wx-hero-main">
+    <div class="layui-container">
+      <div class="layui-row wx-hero-grid">
+        <div class="layui-col-xs12 layui-col-sm12 layui-col-md7 wx-hero-main">
         <span class="wx-badge"><i class="layui-icon layui-icon-engine"></i> ThinkPHP 8 · Layui 2.13.9 · v{$version}</span>
         <p class="wx-hero-kicker">此刻天气</p>
         <h1 class="wx-hero-city" id="wx-city">--</h1>
@@ -25,7 +26,7 @@
         </div>
       </div>
 
-      <aside class="wx-hero-side">
+      <aside class="layui-col-xs12 layui-col-sm12 layui-col-md5 wx-hero-side">
         <div class="wx-glass">
           <div class="wx-glass-head">
             <span class="wx-eyebrow">选择城市</span>
@@ -73,10 +74,12 @@
           </aside>
         </div>
       </aside>
+      </div>
     </div>
   </section>
 
-  <div class="layui-container wx-content">
+  <div class="layui-container">
+    <div class="wx-content">
     <section class="wx-metrics" id="wx-now">
       <article class="wx-metric">
         <span class="wx-metric-icon">💧</span>
@@ -193,10 +196,11 @@
       </div>
     </section>
 
+    </div>
   </div>
 </main>
 
-<div class="layui-container wx-start-block" id="wx-start">
+<div class="layui-container" id="wx-start">
   <section class="wx-cta">
     <div class="wx-cta-text">
       <span class="wx-eyebrow">Ecosystem</span>

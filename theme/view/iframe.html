@@ -7,7 +7,8 @@
 {block name="content"}
 <main id="wx-top">
   <section class="wx-hero wx-hero--compact">
-    <div class="layui-container wx-hero-compact">
+    <div class="layui-container">
+      <div class="wx-hero-compact">
       <span class="wx-badge"><i class="layui-icon layui-icon-template-1"></i> iframe · 内嵌页面</span>
       <h1 class="wx-compact-title">内嵌<em>天气内容页</em>示例</h1>
       <p class="wx-compact-desc">
@@ -21,9 +22,11 @@
         <a class="wx-btn wx-btn-ghost" href="{$base}/index">返回天气首页</a>
       </p>
     </div>
+    </div>
   </section>
 
-  <div class="layui-container wx-iframe-main">
+  <div class="layui-container">
+    <div class="wx-iframe-main">
     <section class="wx-section">
       <div class="wx-section-head">
         <div>
@@ -59,10 +62,11 @@
         若宿主站点设置了 X-Frame-Options 或 CSP 限制，预览区可能显示空白，此时可直接在新窗口打开。
       </p>
     </section>
+    </div>
   </div>
 </main>
 
-<div class="layui-container wx-start-block" id="wx-start">
+<div class="layui-container" id="wx-start">
   <section class="wx-cta">
     <div class="wx-cta-text">
       <span class="wx-eyebrow">Ecosystem</span>
