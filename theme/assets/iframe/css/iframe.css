@@ -67,6 +67,62 @@
   background: var(--wx-bg);
 }
 
+/* layui 表格与按钮沿用站点品牌色 */
+.wx-iframe-card .layui-table-view {
+  border-color: var(--wx-line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.wx-iframe-card .layui-table-header,
+.wx-iframe-card .layui-table-header th {
+  background: #f7fbfa;
+}
+
+.wx-iframe-card .layui-table th,
+.wx-iframe-card .layui-table td {
+  border-color: var(--wx-line);
+}
+
+.wx-iframe-card .layui-table th {
+  color: var(--wx-ink-2);
+  font-weight: 600;
+}
+
+.wx-iframe-card .layui-table-hover,
+.wx-iframe-card .layui-table-click {
+  background: #f4fbfa;
+}
+
+.wx-iframe-card .layui-btn-xs {
+  height: 26px;
+  line-height: 26px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, #1cc7b6 0, #0f9d92 100%);
+  box-shadow: 0 6px 14px rgba(22, 186, 170, 0.24);
+}
+
+.wx-iframe-card .layui-btn-xs:hover {
+  color: #fff;
+  background: linear-gradient(135deg, #1cc7b6 0, #0e8f83 100%);
+}
+
+.wx-iframe-card .layui-btn-primary {
+  color: var(--wx-ink-2);
+  background: #fff;
+  border: 1px solid var(--wx-line);
+  box-shadow: none;
+}
+
+.wx-iframe-card .layui-btn-primary:hover {
+  color: var(--wx-brand-deep);
+  border-color: var(--wx-brand);
+  background: var(--wx-brand-soft);
+}
+
 .wx-iframe-preview {
   border-radius: 14px;
   overflow: hidden;

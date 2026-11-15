@@ -1,146 +1,297 @@
-/* 内嵌天气内容页：只输出内容区，沿用 layui 官方原版风格 */
+/* 内嵌天气内容页：只输出内容区，沿用站点原有配色 */
+
+:root {
+  --wx-brand: #16baaa;
+  --wx-brand-deep: #0e8f83;
+  --wx-brand-soft: #e3f8f5;
+  --wx-ink: #102a2a;
+  --wx-ink-2: #35504f;
+  --wx-muted: #7a9291;
+  --wx-line: #e3ecea;
+  --wx-bg: #f4f8f7;
+  --wx-card: #ffffff;
+  --wx-warm: #ffb800;
+  --wx-radius: 18px;
+  --wx-radius-sm: 12px;
+  --wx-shadow: 0 8px 30px rgba(16, 42, 42, 0.06);
+  --wx-font: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+  --wx-mono: 'JetBrains Mono', 'Cascadia Code', Consolas, Monaco, monospace;
+}
 
 html,
 body {
   margin: 0;
   padding: 0;
-  background: #f2f2f2;
+  background: var(--wx-bg);
 }
 
 body.iframe-weather {
-  padding: 15px;
-  font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+  padding: 18px;
+  font-family: var(--wx-font);
   font-size: 14px;
-  color: #333;
+  line-height: 1.65;
+  color: var(--wx-ink);
   -webkit-font-smoothing: antialiased;
 }
 
 .iframe-weather .layui-card {
-  border-radius: 2px;
-  border: 1px solid #e6e6e6;
-  box-shadow: none;
+  border-radius: var(--wx-radius);
+  border: 1px solid var(--wx-line);
+  background: var(--wx-card);
+  box-shadow: var(--wx-shadow);
+  overflow: hidden;
 }
 
-.iframe-weather .layui-card-body {
-  padding: 15px;
-}
-
+/* Tab 品牌色 */
 .iframe-weather .layui-tab {
   margin: 0;
 }
 
-.iframe-weather .layui-tab-title li {
-  padding: 0 14px;
+.iframe-weather .layui-tab-title {
+  height: 48px;
+  border-bottom-color: var(--wx-line);
 }
 
+.iframe-weather .layui-tab-title li {
+  min-width: 88px;
+  line-height: 48px;
+  padding: 0 18px;
+  font-size: 13.5px;
+  color: var(--wx-ink-2);
+}
+
+.iframe-weather .layui-tab-title li:hover {
+  color: var(--wx-brand-deep);
+}
+
+.iframe-weather .layui-tab-brief > .layui-tab-title .layui-this {
+  color: var(--wx-brand-deep);
+  font-weight: 600;
+}
+
+.iframe-weather .layui-tab-brief > .layui-tab-title .layui-this:after,
+.iframe-weather .layui-tab-brief > .layui-tab-more li.layui-this:after {
+  border: none;
+  border-bottom: 2px solid var(--wx-brand);
+  border-radius: 0;
+}
+
+.iframe-weather .layui-tab-content {
+  padding: 20px 22px;
+}
+
+/* 工具条 */
 .iframe-weather__toolbar {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
-  padding-bottom: 12px;
-  margin-bottom: 15px;
-  border-bottom: 1px solid #f2f2f2;
+  gap: 10px;
+  padding: 0 0 16px;
+  margin-bottom: 18px;
+  border-bottom: 1px dashed var(--wx-line);
 }
 
 .iframe-weather__toolbar .layui-form-label {
-  width: 48px;
-  padding: 9px 6px 9px 0;
-  text-align: right;
+  width: 46px;
+  padding: 7px 6px 7px 0;
+  font-size: 13px;
+  color: var(--wx-muted);
 }
 
 .iframe-weather__toolbar .layui-input-inline {
-  width: 130px;
+  width: 136px;
+  margin-right: 4px;
 }
 
-.iframe-weather__toolbar .layui-input,
-.iframe-weather__toolbar .layui-select {
-  height: 32px;
-  line-height: 32px;
+.iframe-weather__toolbar .layui-input {
+  height: 34px;
+  line-height: 34px;
+  border-color: var(--wx-line);
+  border-radius: 10px;
+  color: var(--wx-ink);
+  background: #fff;
 }
 
+.iframe-weather__toolbar .layui-input:focus {
+  border-color: var(--wx-brand) !important;
+  box-shadow: 0 0 0 2px rgba(22, 186, 170, 0.12);
+}
+
+.iframe-weather__toolbar .layui-form-select dl {
+  border-radius: 10px;
+  border-color: var(--wx-line);
+}
+
+.iframe-weather__toolbar .layui-form-select dl dd.layui-this {
+  background: var(--wx-brand-soft);
+  color: var(--wx-brand-deep);
+}
+
+.iframe-weather__toolbar .layui-form-select .layui-edge {
+  border-top-color: var(--wx-brand);
+}
+
+/* 按钮 */
+.iframe-weather .layui-btn-normal {
+  height: 34px;
+  line-height: 34px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, #1cc7b6 0, #0f9d92 100%);
+  box-shadow: 0 8px 20px rgba(22, 186, 170, 0.28);
+}
+
+.iframe-weather .layui-btn-normal:hover,
+.iframe-weather .layui-btn-normal:focus {
+  color: #fff;
+  background: linear-gradient(135deg, #1cc7b6 0, #0e8f83 100%);
+  opacity: 1;
+}
+
+.iframe-weather .layui-btn-disabled,
+.iframe-weather .layui-btn-disabled:hover {
+  color: #fff;
+  background: #cfe9e6;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* 提示与代码 */
 .iframe-weather__hint {
   margin-left: auto;
   font-size: 12px;
-  color: #999;
+  color: var(--wx-muted);
 }
 
 .iframe-weather__hint code,
 .iframe-weather__code {
-  font-family: 'Cascadia Code', Consolas, Monaco, monospace;
-  font-size: 12px;
-  padding: 1px 6px;
-  border-radius: 2px;
-  color: #16baaa;
-  background: #f2fbfa;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-family: var(--wx-mono);
+  font-size: 11.5px;
+  color: var(--wx-brand-deep);
+  background: var(--wx-brand-soft);
 }
 
+/* 实时天气 */
 .iframe-weather__now {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 22px;
   flex-wrap: wrap;
-  padding: 10px 4px 18px;
+  padding: 2px 2px 20px;
 }
 
 .iframe-weather__temp {
   display: flex;
   align-items: flex-start;
-  color: #16baaa;
+  font-weight: 800;
+  letter-spacing: -3px;
   line-height: 0.95;
+  background: linear-gradient(120deg, #0e8f83 0, #16baaa 60%, #4dd8c6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .iframe-weather__temp strong {
   font-size: 64px;
-  font-weight: 700;
 }
 
 .iframe-weather__temp span {
   margin-top: 6px;
   font-size: 22px;
-  font-weight: 400;
+  font-weight: 600;
+  letter-spacing: 0;
+  -webkit-text-fill-color: var(--wx-brand-deep);
 }
 
 .iframe-weather__meta h2 {
   margin: 0 0 6px;
   font-size: 20px;
   font-weight: 700;
-  color: #333;
+  color: var(--wx-ink);
 }
 
 .iframe-weather__meta p {
   margin: 0 0 4px;
   font-size: 13px;
-  color: #666;
+  color: var(--wx-ink-2);
 }
 
 .iframe-weather__time {
-  color: #999 !important;
+  color: var(--wx-muted) !important;
   font-size: 12px !important;
 }
 
 .iframe-weather__icon {
   margin-left: auto;
-  font-size: 46px;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  font-size: 34px;
+  background: var(--wx-brand-soft);
+  box-shadow: inset 0 0 0 1px rgba(22, 186, 170, 0.14);
 }
 
+/* 表格 */
 .iframe-weather__table {
-  margin-bottom: 0;
+  margin: 0;
+  border-color: var(--wx-line);
 }
 
 .iframe-weather__table td {
+  padding: 11px 15px;
+  border-color: var(--wx-line);
   font-size: 13px;
+  color: var(--wx-ink-2);
 }
 
 .iframe-weather__table td:first-child {
-  color: #999;
+  color: var(--wx-muted);
+  background: #fafcfb;
 }
 
 .iframe-weather__table code {
-  font-family: 'Cascadia Code', Consolas, Monaco, monospace;
-  font-size: 12px;
+  font-family: var(--wx-mono);
+  font-size: 11.5px;
   word-break: break-all;
+}
+
+.iframe-weather .layui-table-view {
+  margin: 0;
+  border-color: var(--wx-line);
+  border-radius: var(--wx-radius-sm);
+  overflow: hidden;
+}
+
+.iframe-weather .layui-table-header,
+.iframe-weather .layui-table-header th {
+  background: #f7fbfa;
+}
+
+.iframe-weather .layui-table th {
+  color: var(--wx-ink-2);
+  font-weight: 600;
+}
+
+.iframe-weather .layui-table td,
+.iframe-weather .layui-table th {
+  border-color: var(--wx-line);
+}
+
+.iframe-weather .layui-table-hover,
+.iframe-weather .layui-table-click {
+  background: #f4fbfa;
+}
+
+.iframe-weather .layui-table-page {
+  border-color: var(--wx-line);
 }
 
 @media (max-width: 640px) {
@@ -148,8 +299,12 @@ body.iframe-weather {
     padding: 10px;
   }
 
+  .iframe-weather .layui-tab-content {
+    padding: 16px;
+  }
+
   .iframe-weather__toolbar .layui-input-inline {
-    width: 100px;
+    width: 104px;
   }
 
   .iframe-weather__hint {
