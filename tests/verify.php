@@ -93,6 +93,7 @@ foreach ([
     'theme/view/iframe/weather.html',
     'theme/assets/css/site.css',
     'theme/assets/js/app.js',
+    'theme/assets/js/nav.js',
     'theme/assets/iframe/css/iframe.css',
     'theme/assets/iframe/css/weather.css',
     'theme/assets/iframe/js/iframe.js',
@@ -212,6 +213,8 @@ $layout = (string) file_get_contents($packageRoot . '/theme/view/common/layout.h
 $check(str_contains($layout, '{$asset}/layui/css/layui.css'), '布局模板应引用本地 Layui');
 $check(str_contains($layout, '{$asset}/css/site.css'), '布局模板应引用页面样式');
 $check(str_contains($layout, 'layui-nav'), '布局模板的导航应使用 layui 导航组件');
+$check(str_contains($layout, 'wx-nav-toggle'), '布局模板应提供移动端菜单开关');
+$check(str_contains($layout, '{$asset}/js/nav.js'), '布局模板应引用顶部菜单脚本');
 $check(str_contains($layout, 'wx-footer'), '布局模板应包含页脚');
 $check(str_contains($layout, '{$base}/iframe'), '布局模板应提供内嵌示例入口');
 $check(str_contains($layout, '{$music_url}'), '布局模板应使用音乐地址变量');

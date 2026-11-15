@@ -17,13 +17,18 @@
       <span class="wx-brand-mark"><i class="layui-icon layui-icon-light"></i></span>
       <span>Weather<small>THINK STORE WEATHER</small></span>
     </a>
-    <ul class="layui-nav wx-nav" lay-filter="wx-nav">
-      <li class="layui-nav-item{if $active == 'index'} layui-this{/if}"><a href="{$base}/index">首页</a></li>
+    <ul class="layui-nav wx-nav" id="wx-nav" lay-filter="wx-nav">
+      <li class="layui-nav-item{if $active == 'index'} layui-this{/if}"><a href="{if $active == 'index'}#wx-top{else}{$base}/index#wx-top{/if}">概览</a></li>
+      <li class="layui-nav-item"><a href="{if $active == 'index'}#wx-now{else}{$base}/index#wx-now{/if}">实时天气</a></li>
+      <li class="layui-nav-item"><a href="{if $active == 'index'}#wx-api{else}{$base}/index#wx-api{/if}">接口</a></li>
       <li class="layui-nav-item{if $active == 'iframe'} layui-this{/if}"><a href="{$base}/iframe">内嵌示例</a></li>
     </ul>
     <a class="wx-github" href="https://github.com/indiboy-create/think-store-weather" target="_blank" rel="noopener">
       <i class="layui-icon layui-icon-github"></i><span>GitHub</span>
     </a>
+    <button type="button" class="wx-nav-toggle" id="wx-nav-toggle" aria-label="打开导航" aria-expanded="false" aria-controls="wx-nav">
+      <i class="layui-icon layui-icon-spread-left"></i>
+    </button>
     </div>
   </div>
 </header>
@@ -78,7 +83,7 @@
 </footer>
 
 <script src="{$asset}/layui/layui.js"></script>
-<script>layui.use('element', function () {});</script>
+<script src="{$asset}/js/nav.js"></script>
 {block name="script"}{/block}
 </body>
 </html>

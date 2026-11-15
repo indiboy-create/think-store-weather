@@ -233,6 +233,7 @@ think-store-weather/
 │  └─ assets/
 │     ├─ css/site.css             # 站点样式
 │     ├─ js/app.js                # 首页交互
+│     ├─ js/nav.js                # 顶部菜单交互
 │     ├─ iframe/                  # 内嵌页面样式与脚本
 │     └─ layui/                   # 本地 Layui 2.13.9
 └─ tests/verify.php
