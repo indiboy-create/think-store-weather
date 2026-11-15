@@ -36,12 +36,6 @@ body {
 a { color: inherit; text-decoration: none; }
 code { font-family: var(--wx-mono); font-size: 12.5px; }
 
-.wx-container {
-  width: 100%;
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
 
 /* Header */
 .wx-header {
@@ -1062,7 +1056,7 @@ code { font-family: var(--wx-mono); font-size: 12.5px; }
 }
 
 @media (max-width: 640px) {
-  .wx-container { padding: 0 16px; }
+  .layui-container { padding: 0 16px; }
   .wx-cta { flex-direction: column; align-items: flex-start; padding: 28px 24px; }
   .wx-cta h2 { font-size: 23px; }
   .wx-footer { padding: 40px 0 24px; }
