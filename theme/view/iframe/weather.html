@@ -13,85 +13,137 @@
       data-station="{$default_station}"
       data-province="{$default_province}"
       data-city="{$default_city}">
-<div class="layui-card">
-  <div class="layui-tab layui-tab-brief" lay-filter="iframe-weather-tabs">
-    <ul class="layui-tab-title">
-      <li class="layui-this">实时天气</li>
-      <li>七天预报</li>
-      <li>接口说明</li>
-    </ul>
-    <div class="layui-tab-content">
-      <div class="layui-tab-item layui-show">
-        <div class="iframe-weather__toolbar layui-form">
-          <div class="layui-inline">
-            <label class="layui-form-label">省份</label>
-            <div class="layui-input-inline">
-              <select name="province" lay-filter="iframe-province"></select>
+<div class="wx-embed">
+  <section class="wx-embed-hero">
+    <div class="layui-row layui-col-space16 wx-embed-hero__inner">
+      <div class="layui-col-md7 layui-col-xs12">
+        <div class="wx-embed-now">
+          <div class="wx-embed-now__head">
+            <span class="wx-embed-now__badge"><i class="layui-icon layui-icon-location"></i> 实时天气</span>
+            <span class="wx-embed-now__icon" id="iframe-icon">🌤️</span>
+          </div>
+          <div class="wx-embed-now__main">
+            <div class="wx-embed-now__temp">
+              <strong id="iframe-temp">--</strong><span>°C</span>
+            </div>
+            <div class="wx-embed-now__meta">
+              <h1 id="iframe-city">{$default_city}</h1>
+              <p><span id="iframe-info">—</span> · 体感 <span id="iframe-feel">--</span>°C</p>
+              <p class="wx-embed-now__time" id="iframe-publish">正在获取实时数据…</p>
             </div>
           </div>
-          <div class="layui-inline">
-            <label class="layui-form-label">城市</label>
-            <div class="layui-input-inline">
-              <select name="city" lay-filter="iframe-city"></select>
+          <div class="wx-embed-metrics">
+            <div class="wx-embed-metric">
+              <span class="wx-embed-metric__label">湿度</span>
+              <strong id="iframe-humidity">--</strong>
+            </div>
+            <div class="wx-embed-metric">
+              <span class="wx-embed-metric__label">风向风力</span>
+              <strong id="iframe-wind">--</strong>
+            </div>
+            <div class="wx-embed-metric">
+              <span class="wx-embed-metric__label">气压</span>
+              <strong id="iframe-pressure">--</strong>
+            </div>
+            <div class="wx-embed-metric">
+              <span class="wx-embed-metric__label">降水量</span>
+              <strong id="iframe-rain">--</strong>
+            </div>
+            <div class="wx-embed-metric">
+              <span class="wx-embed-metric__label">空气质量</span>
+              <strong id="iframe-aqi">--</strong>
             </div>
           </div>
-          <button type="button" class="layui-btn layui-btn-normal layui-btn-sm" id="iframe-refresh">
+        </div>
+      </div>
+
+      <div class="layui-col-md5 layui-col-xs12">
+        <div class="wx-embed-picker">
+          <div class="wx-embed-picker__head">
+            <span><i class="layui-icon layui-icon-location"></i> 选择城市</span>
+            <span>站点 <code id="iframe-station">{$default_station}</code></span>
+          </div>
+          <div class="layui-form wx-embed-form">
+            <div class="layui-form-item">
+              <label class="layui-form-label">省份</label>
+              <div class="layui-input-block">
+                <select name="province" lay-filter="iframe-province"></select>
+              </div>
+            </div>
+            <div class="layui-form-item">
+              <label class="layui-form-label">城市</label>
+              <div class="layui-input-block">
+                <select name="city" lay-filter="iframe-city"></select>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="layui-btn layui-btn-fluid wx-embed-refresh" id="iframe-refresh">
             <i class="layui-icon layui-icon-refresh"></i> 刷新天气
           </button>
-          <span class="iframe-weather__hint">当前站点 <code id="iframe-station">{$default_station}</code></span>
+          <p class="wx-embed-picker__hint">更新于 <span id="iframe-time">--</span></p>
         </div>
-
-        <div class="iframe-weather__now">
-          <div class="iframe-weather__temp">
-            <strong id="iframe-temp">--</strong><span>°C</span>
-          </div>
-          <div class="iframe-weather__meta">
-            <h2 id="iframe-city">{$default_city}</h2>
-            <p><span id="iframe-info">—</span> · 体感 <span id="iframe-feel">--</span>°C</p>
-            <p class="iframe-weather__time" id="iframe-publish">正在获取实时数据…</p>
-          </div>
-          <span class="iframe-weather__icon" id="iframe-icon">🌤️</span>
-        </div>
-
-        <table class="layui-table iframe-weather__table" lay-skin="line">
-          <colgroup>
-            <col width="140">
-            <col>
-          </colgroup>
-          <tbody>
-            <tr><td>相对湿度</td><td id="iframe-humidity">--</td></tr>
-            <tr><td>风向风力</td><td id="iframe-wind">--</td></tr>
-            <tr><td>气压</td><td id="iframe-pressure">--</td></tr>
-            <tr><td>降水量</td><td id="iframe-rain">--</td></tr>
-            <tr><td>空气质量</td><td id="iframe-aqi">--</td></tr>
-            <tr><td>数据更新时间</td><td id="iframe-time">--</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="layui-tab-item">
-        <table id="iframe-forecast" lay-filter="iframe-forecast"></table>
-      </div>
-
-      <div class="layui-tab-item">
-        <table class="layui-table iframe-weather__table" lay-skin="line">
-          <colgroup>
-            <col width="120">
-            <col>
-          </colgroup>
-          <tbody>
-            <tr><td>页面地址</td><td><code class="iframe-weather__code">{$embed_path}</code></td></tr>
-            <tr><td>天气接口</td><td><code class="iframe-weather__code">{$api_base}/weather?stationid={$default_station}</code></td></tr>
-            <tr><td>省市接口</td><td><code class="iframe-weather__code">{$api_base}/provinces</code></td></tr>
-            <tr><td>请求方法</td><td>GET</td></tr>
-            <tr><td>返回格式</td><td>application/json</td></tr>
-            <tr><td>缓存策略</td><td>默认缓存 8 小时，命中返回 <code>X-Weather-Cache: hit</code></td></tr>
-            <tr><td>内嵌示例</td><td><code class="iframe-weather__code">{$embed_code}</code></td></tr>
-          </tbody>
-        </table>
       </div>
     </div>
-  </div>
+  </section>
+
+  <section class="wx-embed-section">
+    <div class="wx-embed-section__head">
+      <div>
+        <span class="wx-embed-eyebrow">Forecast · 7 Days</span>
+        <h2>七天预报</h2>
+      </div>
+      <span class="wx-embed-section__tip">白天 / 夜间 · 最高最低 · 降水概率</span>
+    </div>
+    <div class="wx-embed-days" id="iframe-forecast">
+      <div class="wx-embed-day is-empty">正在获取预报…</div>
+    </div>
+  </section>
+
+  <section class="wx-embed-section">
+    <div class="wx-embed-section__head">
+      <div>
+        <span class="wx-embed-eyebrow">API</span>
+        <h2>接口说明</h2>
+      </div>
+      <span class="wx-embed-section__tip">与首页共用站点白名单与 8 小时缓存</span>
+    </div>
+
+    <div class="layui-row layui-col-space12 wx-embed-api">
+      <div class="layui-col-md6 layui-col-xs12">
+        <article class="wx-embed-api__card">
+          <span class="layui-badge layui-bg-green">GET</span>
+          <code>{$api_base}/weather?stationid={$default_station}</code>
+          <p>天气 JSON，默认读取缓存；命中时响应头返回 <code>X-Weather-Cache: hit</code>。</p>
+        </article>
+      </div>
+      <div class="layui-col-md6 layui-col-xs12">
+        <article class="wx-embed-api__card">
+          <span class="layui-badge layui-bg-green">GET</span>
+          <code>{$api_base}/provinces</code>
+          <p>省市联动数据，城市节点的 <code>code</code> 可直接作为 <code>stationid</code>。</p>
+        </article>
+      </div>
+      <div class="layui-col-md6 layui-col-xs12">
+        <article class="wx-embed-api__card">
+          <span class="layui-badge">PAGE</span>
+          <code>{$embed_path}</code>
+          <p>当前页面地址，只输出内容区，不含站点导航与页脚。</p>
+        </article>
+      </div>
+      <div class="layui-col-md6 layui-col-xs12">
+        <article class="wx-embed-api__card">
+          <span class="layui-badge layui-bg-orange">CACHE</span>
+          <code>X-Weather-Cache</code>
+          <p>默认缓存 8 小时；<code>/api/refresh</code> 携带 token 可跳过缓存强制回源。</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="wx-embed-code">
+      <div class="wx-embed-code__head"><span>iframe 嵌入</span><span>width:100% · height:580px</span></div>
+      <pre><code>{$embed_code}</code></pre>
+    </div>
+  </section>
 </div>
 <script src="{$asset}/layui/layui.js"></script>
 <script src="{$asset}/iframe/js/weather.js"></script>

@@ -12,10 +12,10 @@
 
   var state = {
     tree: [],
+    data: null,
     stationid: cfg.station,
     loading: false,
     form: null,
-    table: null,
     layer: null
   };
 
@@ -184,12 +184,12 @@
 
     var button = el('iframe-refresh');
 
-    if (button) {
-      button.disabled = loading;
-      button.className = loading
-        ? 'layui-btn layui-btn-normal layui-btn-sm layui-btn-disabled'
-        : 'layui-btn layui-btn-normal layui-btn-sm';
+    if (!button) {
+      return;
     }
+
+    button.disabled = loading;
+    button.classList.toggle('layui-btn-disabled', loading);
   }
 
   function queryWeather(code, force) {
@@ -271,47 +271,55 @@
         night: show(nightWeather.info),
         high: show(dayWeather.temperature),
         low: show(nightWeather.temperature),
+        highValue: Number(dayWeather.temperature),
+        lowValue: Number(nightWeather.temperature),
         rain: show(item.precipitation, '%')
       };
     });
   }
 
   function renderForecast(data) {
-    if (!state.table) {
+    var list = el('iframe-forecast');
+
+    if (!list) {
       return;
     }
 
-    state.table.render({
-      elem: '#iframe-forecast',
-      id: 'iframe-forecast',
-      data: forecastRows(data),
-      page: false,
-      even: true,
-      text: { none: '暂无预报数据' },
-      cols: [[
-        { field: 'date', title: '日期', width: 100 },
-        { field: 'week', title: '星期', width: 90 },
-        { field: 'day', title: '白天', minWidth: 110 },
-        { field: 'night', title: '夜间', minWidth: 110 },
-        {
-          field: 'high',
-          title: '最高气温',
-          width: 110,
-          templet: function (row) {
-            return escapeHtml(row.high) + '°';
-          }
-        },
-        {
-          field: 'low',
-          title: '最低气温',
-          width: 110,
-          templet: function (row) {
-            return escapeHtml(row.low) + '°';
-          }
-        },
-        { field: 'rain', title: '降水概率', width: 110 }
-      ]]
+    var rows = forecastRows(data);
+
+    if (rows.length === 0) {
+      list.innerHTML = '<div class="wx-embed-day is-empty">暂无预报数据</div>';
+      return;
+    }
+
+    var values = [];
+
+    rows.forEach(function (row) {
+      if (!isNaN(row.highValue)) values.push(row.highValue);
+      if (!isNaN(row.lowValue)) values.push(row.lowValue);
     });
+
+    var min = values.length > 0 ? Math.min.apply(null, values) : 0;
+    var max = values.length > 0 ? Math.max.apply(null, values) : 1;
+    var span = max - min || 1;
+
+    list.innerHTML = rows.map(function (row, index) {
+      var low = isNaN(row.lowValue) ? min : row.lowValue;
+      var high = isNaN(row.highValue) ? min : row.highValue;
+      var left = Math.max(0, Math.min(94, ((low - min) / span) * 100));
+      var width = Math.max(6, Math.min(100 - left, ((high - low) / span) * 100));
+      var icon = iconFor(row.day !== '—' ? row.day : row.night);
+
+      return '<article class="wx-embed-day' + (index === 0 ? ' is-today' : '') + '" style="--i:' + index + '">'
+        + '<span class="wx-embed-day__week">' + (index === 0 ? '今天' : escapeHtml(row.week)) + '</span>'
+        + '<span class="wx-embed-day__date">' + escapeHtml(row.date) + '</span>'
+        + '<span class="wx-embed-day__icon">' + icon + '</span>'
+        + '<span class="wx-embed-day__weather">' + escapeHtml(row.day) + ' / ' + escapeHtml(row.night) + '</span>'
+        + '<div class="wx-embed-day__temps"><strong>' + escapeHtml(row.high) + '°</strong><span>' + escapeHtml(row.low) + '°</span></div>'
+        + '<div class="wx-embed-day__bar"><i style="left:' + left.toFixed(1) + '%;width:' + width.toFixed(1) + '%"></i></div>'
+        + '<span class="wx-embed-day__rain">降水 ' + escapeHtml(row.rain) + '</span>'
+        + '</article>';
+    }).join('');
   }
 
   function bindEvents() {
@@ -367,22 +375,11 @@
     }
   }
 
-  function boot(form, table, layer) {
+  function boot(form, layer) {
     state.form = form;
-    state.table = table;
     state.layer = layer;
 
     bindEvents();
-
-    if (window.layui && window.layui.element) {
-      window.layui.element.on('tab(iframe-weather-tabs)', function () {
-        window.setTimeout(function () {
-          if (state.table && typeof state.table.resize === 'function') {
-            state.table.resize('iframe-forecast');
-          }
-        }, 0);
-      });
-    }
 
     loadProvinces()
       .then(function () {
@@ -395,13 +392,13 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     if (window.layui && typeof window.layui.use === 'function') {
-      window.layui.use(['form', 'table', 'layer', 'element'], function () {
-        boot(window.layui.form, window.layui.table, window.layui.layer);
+      window.layui.use(['form', 'layer'], function () {
+        boot(window.layui.form, window.layui.layer);
       });
 
       return;
     }
 
-    boot(null, null, null);
+    boot(null, null);
   });
 })();
