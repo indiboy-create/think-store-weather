@@ -11,8 +11,8 @@ use think\view\driver\Think;
  * 包内视图渲染器。
  *
  * 固定使用 think-view 的 Think 驱动，模板目录由 config/store_weather.php 的
- * view 配置决定：留空使用包内 theme/view，非空时使用主项目
- * view/think-store-weather 目录；模板缓存使用宿主 runtime 目录并加独立前缀。
+ * view 配置决定：留空使用包内 theme/view，非空（如 view/think-store-weather）时
+ * 使用主项目 view/think-store-weather 目录；模板缓存使用宿主 runtime 目录并加独立前缀。
  *
  * think-view 的 fetch() 直接输出内容，因此用输出缓冲捕获并返回字符串。
  */
@@ -30,8 +30,8 @@ class View
     /**
      * 解析模板目录。
      *
-     * view 配置留空时使用包内 theme/view；填写非空值后改用宿主
-     * view 目录下的 think-store-weather 目录。
+     * view 配置留空时使用包内 theme/view；填写非空值（如 view/think-store-weather）
+     * 后改用宿主 view 目录下的 think-store-weather 目录。
      */
     protected function resolvePath(): string
     {

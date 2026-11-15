@@ -58,7 +58,7 @@ think-store 商店会读取该字段作为发布包的「访问」地址。
 
 ## 页面与静态资源
 
-- 模板默认位于包内 `theme/view/dashboard.html`，由包内 `View` 渲染器固定使用 think-view 的 `Think` 驱动渲染；当 `view` 配置非空时，改为读取主项目 `view/think-store-weather/dashboard.html`，需要自行把模板复制过去。
+- 模板默认位于包内 `theme/view/dashboard.html`，由包内 `View` 渲染器固定使用 think-view 的 `Think` 驱动渲染；当 `view` 配置填写非空值（如 `view/think-store-weather`）时，改为读取主项目 `view/think-store-weather/dashboard.html`，需要自行把模板复制过去。
 - 静态资源由 `AssetController` 读取 `theme/assets` 后输出，路径经过 `realpath` 校验并拒绝 `..`，避免目录穿越。
 - 资源响应带 `Cache-Control: public, max-age=86400`，字体、CSS、JS、图片等类型会返回对应的 `Content-Type`。
 - 模板内的接口地址、资源地址与音乐地址会跟随 `route.prefix`、`route.segment` 与 `assets` 自动变化。
@@ -116,7 +116,7 @@ curl 'https://example.com/store/think-store-weather/api/refresh?stationid=YVItN&
 | `api.cache_ttl` | `28800` | 响应缓存时间（秒） |
 | `api.refresh_token` | `''` | 强制刷新令牌，留空表示禁用 |
 | `assets` | `assets` | 静态资源路径，相对路径会拼在包内命名空间后 |
-| `view` | `''` | 留空使用包内 `theme/view`；填写非空值（如 `think-store-weather`）后改用主项目 `view/think-store-weather` 目录 |
+| `view` | `''` | 留空使用包内 `theme/view`；填写非空值（如 `view/think-store-weather`）后改用主项目 `view/think-store-weather` 目录 |
 
 `Service` 会自动合并包内默认配置与主项目配置，项目侧配置优先。修改后清除 `runtime` 缓存即可生效。
 
