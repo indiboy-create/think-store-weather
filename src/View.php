@@ -10,9 +10,9 @@ use think\view\driver\Think;
 /**
  * 包内视图渲染器。
  *
- * 固定使用 think-view 的 Think 驱动，模板目录指向包内 theme/view，
- * 不依赖宿主项目的 view_path、view_suffix 等配置；模板缓存使用宿主
- * runtime 目录并加独立前缀，避免与其他应用的缓存互相覆盖。
+ * 固定使用 think-view 的 Think 驱动，模板目录由 config/store_weather.php 的
+ * view 配置决定：留空使用包内 theme/view，非空时使用主项目
+ * view/think-store-weather 目录；模板缓存使用宿主 runtime 目录并加独立前缀。
  *
  * think-view 的 fetch() 直接输出内容，因此用输出缓冲捕获并返回字符串。
  */
@@ -24,7 +24,30 @@ class View
 
     public function __construct(protected App $app)
     {
-        $this->path = dirname(__DIR__) . '/theme/view/';
+        $this->path = $this->resolvePath();
+    }
+
+    /**
+     * 解析模板目录。
+     *
+     * view 配置留空时使用包内 theme/view；填写非空值后改用宿主
+     * view 目录下的 think-store-weather 目录。
+     */
+    protected function resolvePath(): string
+    {
+        $view = trim((string) $this->app->config->get('store_weather.view', ''));
+
+        if ($view === '') {
+            return dirname(__DIR__) . '/theme/view/';
+        }
+
+        $root = rtrim((string) $this->app->config->get('view.view_path', ''), '/\\');
+
+        if ($root === '') {
+            $root = rtrim($this->app->getRootPath(), '/\\') . DIRECTORY_SEPARATOR . 'view';
+        }
+
+        return str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $root) . DIRECTORY_SEPARATOR . 'think-store-weather' . DIRECTORY_SEPARATOR;
     }
 
     /**
@@ -71,7 +94,7 @@ class View
             'view_path'    => $this->path,
             'view_suffix'  => 'html',
             'cache_path'   => $this->app->getRuntimePath() . 'temp' . DIRECTORY_SEPARATOR,
-            'cache_prefix' => 'weather_',
+            'cache_prefix' => 'store_weather_',
         ]);
     }
 }

@@ -22,8 +22,8 @@ class Service extends BaseService
 
     public function boot(): void
     {
-        if ($this->app->config->get('weather.route.enabled', true)) {
-            $this->loadRoutesFrom(dirname(__DIR__) . '/route/weather.php');
+        if ($this->app->config->get('store_weather.route.enabled', true)) {
+            $this->loadRoutesFrom(dirname(__DIR__) . '/route/store_weather.php');
         }
     }
 
@@ -33,22 +33,22 @@ class Service extends BaseService
     protected function mergeConfig(): void
     {
         /** @var array<string, mixed> $default */
-        $default = require dirname(__DIR__) . '/config/weather.php';
+        $default = require dirname(__DIR__) . '/config/store_weather.php';
 
         /** @var array<string, mixed> $current */
-        $current = (array) $this->app->config->get('weather', []);
+        $current = (array) $this->app->config->get('store_weather', []);
 
-        $this->app->config->set(array_replace_recursive($default, $current), 'weather');
+        $this->app->config->set(array_replace_recursive($default, $current), 'store_weather');
     }
 
     /**
-     * 注册核心服务，支持 app('weather') 与 app(Weather::class) 两种取法。
+     * 注册核心服务，支持 app('think-store-weather') 与 app(Weather::class) 两种取法。
      */
     protected function bindWeather(): void
     {
-        $this->app->bind('weather', function (): Weather {
+        $this->app->bind('think-store-weather', function (): Weather {
             /** @var array<string, mixed> $config */
-            $config = (array) $this->app->config->get('weather', []);
+            $config = (array) $this->app->config->get('store_weather', []);
 
             /** @var array<string, mixed> $api */
             $api = (array) ($config['api'] ?? []);
@@ -62,6 +62,6 @@ class Service extends BaseService
             );
         });
 
-        $this->app->bind(Weather::class, 'weather');
+        $this->app->bind(Weather::class, 'think-store-weather');
     }
 }

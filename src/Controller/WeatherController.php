@@ -148,15 +148,15 @@ class WeatherController
 
     private function routeBase(): string
     {
-        $prefix  = trim((string) Config::get('weather.route.prefix', 'store'), '/');
-        $segment = trim((string) Config::get('weather.route.segment', 'think-store-weather'), '/');
+        $prefix  = trim((string) Config::get('store_weather.route.prefix', 'store'), '/');
+        $segment = trim((string) Config::get('store_weather.route.segment', 'think-store-weather'), '/');
 
         return ($prefix === '' ? '' : '/' . $prefix) . ($segment === '' ? '' : '/' . $segment);
     }
 
     private function assetBase(): string
     {
-        $raw = trim((string) Config::get('weather.assets', 'assets'));
+        $raw = trim((string) Config::get('store_weather.assets', 'assets'));
 
         if ($raw === '') {
             $raw = 'assets';

@@ -12,15 +12,15 @@ use Youvision\ThinkStoreWeather\Controller\WeatherController;
  * 由 Youvision\ThinkStoreWeather\Service 在 boot 阶段加载，
  * 宿主项目引入本包后无需再复制路由文件。
  *
- * 前缀、命名空间与中间件来自 config/weather.php：
- * - weather.route.enabled    是否注册内置路由
- * - weather.route.prefix     路由前缀，默认 store
- * - weather.route.segment    包内命名空间，默认 think-store-weather
- * - weather.route.middleware 应用到整组路由的中间件
+ * 前缀、命名空间与中间件来自 config/store_weather.php：
+ * - store_weather.route.enabled    是否注册内置路由
+ * - store_weather.route.prefix     路由前缀，默认 store
+ * - store_weather.route.segment    包内命名空间，默认 think-store-weather
+ * - store_weather.route.middleware 应用到整组路由的中间件
  */
-$prefix     = trim((string) config('weather.route.prefix', 'store'), '/');
-$segment    = trim((string) config('weather.route.segment', 'think-store-weather'), '/');
-$middleware = (array) config('weather.route.middleware', []);
+$prefix     = trim((string) config('store_weather.route.prefix', 'store'), '/');
+$segment    = trim((string) config('store_weather.route.segment', 'think-store-weather'), '/');
+$middleware = (array) config('store_weather.route.middleware', []);
 
 $register = static function () use ($segment): void {
     $base = $segment === '' ? '' : $segment . '/';

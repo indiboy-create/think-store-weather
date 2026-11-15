@@ -47,8 +47,8 @@ $check(
     'composer.json 应注册 ThinkPHP 服务'
 );
 $check(
-    ($composer['extra']['think']['config']['weather'] ?? '') === 'config/weather.php',
-    'composer.json 应声明 weather 配置发布'
+    ($composer['extra']['think']['config']['store_weather'] ?? '') === 'config/store_weather.php',
+    'composer.json 应声明 store_weather 配置发布'
 );
 $check(
     ($composer['extra']['store']['home'] ?? '') === '/store/think-store-weather/index',
@@ -59,8 +59,8 @@ $check(
     'composer.json 应提供 test 脚本'
 );
 
-$configFile = $packageRoot . '/config/weather.php';
-$check(is_file($configFile), 'config/weather.php 应存在');
+$configFile = $packageRoot . '/config/store_weather.php';
+$check(is_file($configFile), 'config/store_weather.php 应存在');
 
 $config = require $configFile;
 
@@ -69,14 +69,16 @@ $check(($config['route']['prefix'] ?? '') === 'store', '默认路由前缀应为
 $check(($config['route']['segment'] ?? '') === 'think-store-weather', '默认包内命名空间应为 think-store-weather');
 $check(($config['route']['middleware'] ?? null) === [], '默认路由中间件应为空数组');
 $check(($config['assets'] ?? '') === 'assets', '默认静态资源路径应为 assets');
+$check(($config['view'] ?? null) === '', '默认视图配置应为空，使用包内模板');
+
 $check(($config['api']['cache_ttl'] ?? 0) === 28800, '默认缓存时间应为 28800 秒');
 $check(str_contains((string) ($config['api']['endpoint'] ?? ''), '%s'), '上游地址应包含 %s 占位符');
 $check(($config['api']['referer'] ?? '') !== '', '默认应配置上游 Referer');
 
 foreach ([
     'composer.json',
-    'config/weather.php',
-    'route/weather.php',
+    'config/store_weather.php',
+    'route/store_weather.php',
     'src/Service.php',
     'src/Weather.php',
     'src/View.php',
@@ -96,7 +98,7 @@ foreach ([
     $check(is_file($packageRoot . '/' . $file), $file . ' 应存在');
 }
 
-$check(!is_file($packageRoot . '/src/route/route.php'), '路由应已迁移到顶层 route/weather.php');
+$check(!is_file($packageRoot . '/src/route/route.php'), '路由应已迁移到顶层 route/store_weather.php');
 
 $upstreamHost = 'nmc' . '.cn';
 
@@ -105,14 +107,14 @@ foreach ([
     'src/Service.php',
     'src/Controller/WeatherController.php',
     'src/Support/WeatherClient.php',
-    'route/weather.php',
+    'route/store_weather.php',
     'README.md',
     'CHANGELOG.md',
     'theme/view/dashboard.html',
 ] as $file) {
     $check(
         !str_contains((string) file_get_contents($packageRoot . '/' . $file), $upstreamHost),
-        $file . ' 不应硬编码上游域名，只允许出现在 config/weather.php'
+        $file . ' 不应硬编码上游域名，只允许出现在 config/store_weather.php'
     );
 }
 
@@ -122,7 +124,7 @@ $check(!str_contains($clientSource, 'DEFAULT_ENDPOINT'), '上游地址不应提�
 $check(str_contains($clientSource, 'referer'), '客户端应支持注入 Referer');
 $check(str_contains($clientSource, '天气接口地址未配置'), '上游地址缺失时应给出明确错误');
 
-$routeSource = (string) file_get_contents($packageRoot . '/route/weather.php');
+$routeSource = (string) file_get_contents($packageRoot . '/route/store_weather.php');
 
 $check(str_contains($routeSource, "\$segment"), '路由应读取包内命名空间配置');
 $check(str_contains($routeSource, "\$base . 'index'"), '路由应注册带命名空间的页面地址');
@@ -139,10 +141,10 @@ $check(!str_contains($routeSource, "if (\$prefix === '')"), '空前缀时也应�
 $serviceSource = (string) file_get_contents($packageRoot . '/src/Service.php');
 
 $check(str_contains($serviceSource, 'loadRoutesFrom'), '服务应在 boot 阶段加载路由');
-$check(str_contains($serviceSource, "bind('weather'"), '服务应绑定 weather 容器别名');
+$check(str_contains($serviceSource, "bind('think-store-weather'"), '服务应绑定 think-store-weather 容器别名');
 $check(str_contains($serviceSource, 'bind(Weather::class'), '服务应绑定 Weather 类名');
 $check(str_contains($serviceSource, 'mergeConfig'), '服务应合并包内默认配置');
-$check(str_contains($serviceSource, "dirname(__DIR__) . '/route/weather.php'"), '服务应加载顶层路由文件');
+$check(str_contains($serviceSource, "dirname(__DIR__) . '/route/store_weather.php'"), '服务应加载顶层路由文件');
 $check(str_contains($serviceSource, 'instance(View::class'), '服务应注册包内视图渲染器');
 
 $viewSource = (string) file_get_contents($packageRoot . '/src/View.php');
@@ -150,6 +152,11 @@ $viewSource = (string) file_get_contents($packageRoot . '/src/View.php');
 $check(str_contains($viewSource, 'think\\view\\driver\\Think'), '渲染器应使用 think-view 的 Think 驱动');
 $check(str_contains($viewSource, "'view_path'"), '渲染器应指定模板目录');
 $check(str_contains($viewSource, '/theme/view/'), '渲染器应指向包内 theme/view 目录');
+$check(str_contains($viewSource, "'store_weather.view'"), '渲染器应读取视图来源配置');
+$check(str_contains($viewSource, 'view.view_path'), '渲染器应读取宿主视图目录');
+$check(str_contains($viewSource, 'getRootPath'), '宿主视图目录缺失时应回退根目录');
+$check(str_contains($viewSource, "'think-store-weather'"), '渲染器应定位宿主 think-store-weather 目录');
+$check(str_contains($viewSource, 'resolvePath'), '渲染器应解析模板目录');
 $check(str_contains($viewSource, 'cache_path'), '渲染器应配置模板缓存目录');
 $check(str_contains($viewSource, 'getRuntimePath'), '渲染器应使用宿主运行时目录');
 $check(str_contains($viewSource, 'cache_prefix'), '渲染器应使用独立缓存前缀');
@@ -197,7 +204,7 @@ $readme = (string) file_get_contents($packageRoot . '/README.md');
 
 $check(str_contains($readme, '/store/think-store-weather/index'), 'README 应说明默认页面地址');
 $check(str_contains($readme, '/store/think-store-weather/assets/<path>'), 'README 应说明静态资源地址');
-$check(str_contains($readme, "app('weather')"), 'README 应说明容器调用方式');
+$check(str_contains($readme, "app('think-store-weather')"), 'README 应说明容器调用方式');
 $check(str_contains($readme, 'extra.store.home'), 'README 应说明商店首页声明');
 $check(str_contains($readme, 'composer test'), 'README 应说明 test 脚本');
 

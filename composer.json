@@ -33,7 +33,7 @@
                 "Youvision\\ThinkStoreWeather\\Service"
             ],
             "config": {
-                "weather": "config/weather.php"
+                "store_weather": "config/store_weather.php"
             }
         },
         "store": {

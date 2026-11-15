@@ -25,7 +25,7 @@ php think service:discover
 php think vendor:publish
 ```
 
-配置声明在 `composer.json` 的 `extra.think.config.weather`，发布后可在主项目 `config/weather.php` 覆盖。
+配置声明在 `composer.json` 的 `extra.think.config.store_weather`，发布后可在主项目 `config/store_weather.php` 覆盖。
 
 ## 路由
 
@@ -38,7 +38,7 @@ php think vendor:publish
 | GET | `/store/think-store-weather/assets/<path>` | 包内静态资源，含 Layui、样式与脚本 |
 | GET | `/store/think-store-weather/music` | 页面背景音乐，支持 HTTP Range 与进度拖动 |
 
-路由由 `Youvision\ThinkStoreWeather\Service` 在 `boot()` 阶段加载，宿主项目不需要复制路由文件。路由前缀由 `config/weather.php` 的 `route.prefix` 控制，默认 `store`；包内命名空间由 `route.segment` 控制，默认 `think-store-weather`。设为空字符串时地址变为 `/index`、`/api/provinces` 等。静态资源地址跟随包内命名空间，默认 `/store/think-store-weather/assets`。
+路由由 `Youvision\ThinkStoreWeather\Service` 在 `boot()` 阶段加载，宿主项目不需要复制路由文件。路由前缀由 `config/store_weather.php` 的 `route.prefix` 控制，默认 `store`；包内命名空间由 `route.segment` 控制，默认 `think-store-weather`。设为空字符串时地址变为 `/index`、`/api/provinces` 等。静态资源地址跟随包内命名空间，默认 `/store/think-store-weather/assets`。
 
 ## 商店首页
 
@@ -58,7 +58,7 @@ think-store 商店会读取该字段作为发布包的「访问」地址。
 
 ## 页面与静态资源
 
-- 模板位于包内 `theme/view/dashboard.html`，由包内 `View` 渲染器固定使用 think-view 的 `Think` 驱动渲染，不依赖宿主的 `view_path`、`view_suffix` 等配置，也不需要复制到主项目。
+- 模板默认位于包内 `theme/view/dashboard.html`，由包内 `View` 渲染器固定使用 think-view 的 `Think` 驱动渲染；当 `view` 配置非空时，改为读取主项目 `view/think-store-weather/dashboard.html`，需要自行把模板复制过去。
 - 静态资源由 `AssetController` 读取 `theme/assets` 后输出，路径经过 `realpath` 校验并拒绝 `..`，避免目录穿越。
 - 资源响应带 `Cache-Control: public, max-age=86400`，字体、CSS、JS、图片等类型会返回对应的 `Content-Type`。
 - 模板内的接口地址、资源地址与音乐地址会跟随 `route.prefix`、`route.segment` 与 `assets` 自动变化。
@@ -90,7 +90,7 @@ GET `/store/think-store-weather/api/weather?stationid=YVItN`
 - 强制刷新：`X-Weather-Cache: refresh`，忽略缓存、回源并覆盖缓存
 - 刷新令牌无效或未配置：HTTP 403，`X-Weather-Cache: bypass`
 
-在 `config/weather.php` 配置令牌后即可使用：
+在 `config/store_weather.php` 配置令牌后即可使用：
 
 ```bash
 curl 'https://example.com/store/think-store-weather/api/refresh?stationid=YVItN&token=your-token'
@@ -102,7 +102,7 @@ curl 'https://example.com/store/think-store-weather/api/refresh?stationid=YVItN&
 
 ## 配置
 
-配置文件位于 `config/weather.php`，发布后可在主项目中覆盖：
+配置文件位于 `config/store_weather.php`，发布后可在主项目中覆盖：
 
 | 配置项 | 默认值 | 说明 |
 |---|---|---|
@@ -116,11 +116,12 @@ curl 'https://example.com/store/think-store-weather/api/refresh?stationid=YVItN&
 | `api.cache_ttl` | `28800` | 响应缓存时间（秒） |
 | `api.refresh_token` | `''` | 强制刷新令牌，留空表示禁用 |
 | `assets` | `assets` | 静态资源路径，相对路径会拼在包内命名空间后 |
+| `view` | `''` | 留空使用包内 `theme/view`；填写非空值（如 `think-store-weather`）后改用主项目 `view/think-store-weather` 目录 |
 
 `Service` 会自动合并包内默认配置与主项目配置，项目侧配置优先。修改后清除 `runtime` 缓存即可生效。
 
 ```php
-// config/weather.php
+// config/store_weather.php
 return [
     'api' => [
         'endpoint'      => 'https://example.com/rest/weather?stationid=%s',
@@ -136,6 +137,7 @@ return [
         'middleware' => [],
     ],
     'assets' => 'assets',
+    'view'   => '',
 ];
 ```
 
@@ -149,7 +151,7 @@ return [
 use Youvision\ThinkStoreWeather\Weather;
 
 /** @var Weather $weather */
-$weather = app('weather');
+$weather = app('think-store-weather');
 // 也可使用类名：app(Weather::class)
 
 // 省市联动树
@@ -179,9 +181,9 @@ $weather = new Weather(
 think-store-weather/
 ├─ composer.json
 ├─ config/
-│  └─ weather.php                 # 天气配置
+│  └─ store_weather.php           # 天气配置
 ├─ route/
-│  └─ weather.php                 # 页面、查询与资源路由
+│  └─ store_weather.php           # 页面、查询与资源路由
 ├─ src/
 │  ├─ Service.php                 # ThinkPHP 服务注册
 │  ├─ Weather.php                 # 核心服务：省市数据、缓存与回源
