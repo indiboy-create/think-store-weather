@@ -157,24 +157,27 @@ code { font-family: var(--wx-mono); font-size: 12.5px; }
 .wx-github {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 34px;
-  padding: 0 14px;
-  border: 1px solid var(--wx-line);
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 7px;
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid rgba(22, 186, 170, 0.16);
   border-radius: 999px;
-  font-size: 12.5px;
-  color: var(--wx-ink-2);
-  background: #fff;
+  background: rgba(22, 186, 170, 0.07);
+  color: var(--wx-brand-deep);
+  font-size: 13px;
   white-space: nowrap;
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
 }
 
 .wx-github .layui-icon { font-size: 15px; }
 
 .wx-github:hover {
-  border-color: var(--wx-brand);
-  color: var(--wx-brand-deep);
-  background: var(--wx-brand-soft);
+  border-color: transparent;
+  background: linear-gradient(135deg, #1cc7b6 0, #0f9d92 100%);
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(22, 186, 170, 0.3);
 }
 
 /* Hero */
