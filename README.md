@@ -197,18 +197,13 @@ think-store-weather/
 │     ├─ css/site.css             # 页面样式
 │     ├─ js/app.js                # 页面交互
 │     └─ layui/                   # 本地 Layui 2.13.9
-├─ tests/
-├─ phpstan.neon
-└─ phpunit.xml
+└─ tests/verify.php
 ```
 
 ## 验证
 
 ```bash
-composer test        # PHPUnit
 composer verify      # 结构与配置校验脚本
-composer analyse     # PHPStan level 5
-composer check       # 三者一起跑
 ```
 
 `tests/verify.php` 会检查 `composer.json` 的依赖、服务注册、配置发布与商店首页声明，默认配置、路由定义、控制器与资源解析，并实际调用 `Weather` 服务验证白名单回退、强制刷新令牌与资源目录穿越防护。
