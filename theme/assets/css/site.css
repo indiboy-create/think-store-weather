@@ -783,7 +783,7 @@ code { font-family: var(--wx-mono); font-size: 12.5px; }
 
 .wx-note {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
   margin-top: 16px;
   padding: 14px 18px;
@@ -794,7 +794,12 @@ code { font-family: var(--wx-mono); font-size: 12.5px; }
   border: 1px dashed var(--wx-line);
 }
 
-.wx-note .layui-icon { color: var(--wx-warm); font-size: 15px; margin-top: 2px; }
+.wx-note .layui-icon {
+  flex-shrink: 0;
+  color: var(--wx-warm);
+  font-size: 15px;
+  line-height: 1;
+}
 
 .wx-note code {
   padding: 1px 6px;
