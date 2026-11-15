@@ -775,6 +775,8 @@ code { font-family: var(--wx-mono); font-size: 12.5px; }
 }
 
 /* CTA */
+.wx-start-block { margin-top: 42px; }
+
 .wx-cta {
   position: relative;
   overflow: hidden;
