@@ -21,7 +21,10 @@
 
 .wx-compact-title em {
   font-style: normal;
-  color: #7fe6da;
+  background: linear-gradient(100deg, #4de3d4 0, #16baaa 46%, #ffd76a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .wx-compact-desc {
